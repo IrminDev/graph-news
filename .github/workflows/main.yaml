@@ -1,0 +1,31 @@
+name: Notify Discord on Commit
+
+on:
+  push:
+    branches:
+      - main
+      - '**' # Trigger for all branches
+
+jobs:
+  notify-discord:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Notify Discord for Main Branch
+        if: github.ref == 'refs/heads/main'
+        uses: Ilshidur/action-discord@master
+        with:
+          args: '🚀 **New commit on `main` branch!**\n\n**Repository:** ${{ github.repository }}\n**Commit Message:** ${{ github.event.head_commit.message }}\n**Author:** ${{ github.event.head_commit.author.name }}\n**View Changes:** ${{ github.event.head_commit.url }}'
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+
+      - name: Notify Discord for Other Branches
+        if: github.ref != 'refs/heads/main'
+        uses: Ilshidur/action-discord@master
+        with:
+          args: '📝 **New commit on branch `${{ github.ref_name }}`**\n\n**Repository:** ${{ github.repository }}\n**Commit Message:** ${{ github.event.head_commit.message }}\n**Author:** ${{ github.event.head_commit.author.name }}\n**View Changes:** ${{ github.event.head_commit.url }}'
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
