@@ -18,7 +18,12 @@ jobs:
         if: github.ref == 'refs/heads/main'
         uses: Ilshidur/action-discord@master
         with:
-          args: '🚀 **New commit on `main` branch!**\n\n**Repository:** ${{ github.repository }}\n**Commit Message:** ${{ github.event.head_commit.message }}\n**Author:** ${{ github.event.head_commit.author.name }}\n**View Changes:** ${{ github.event.head_commit.url }}'
+          args: |
+            🚀 **New commit on `main` branch!**
+            **Repository:** ${{ github.repository }}
+            **Commit Message:** ${{ github.event.head_commit.message }}
+            **Author:** ${{ github.event.head_commit.author.name }}
+            **View Changes:** ${{ github.event.head_commit.url }}
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
 
@@ -26,6 +31,11 @@ jobs:
         if: github.ref != 'refs/heads/main'
         uses: Ilshidur/action-discord@master
         with:
-          args: '📝 **New commit on branch `${{ github.ref_name }}`**\n\n**Repository:** ${{ github.repository }}\n**Commit Message:** ${{ github.event.head_commit.message }}\n**Author:** ${{ github.event.head_commit.author.name }}\n**View Changes:** ${{ github.event.head_commit.url }}'
+          args: |
+            📝 **New commit on branch `${{ github.ref_name }}`**
+            **Repository:** ${{ github.repository }}
+            **Commit Message:** ${{ github.event.head_commit.message }}
+            **Author:** ${{ github.event.head_commit.author.name }}
+            **View Changes:** ${{ github.event.head_commit.url }}
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
