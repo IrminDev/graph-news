@@ -2,7 +2,6 @@ package com.github.irmindev.graph_news.utils;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
@@ -24,14 +23,17 @@ public class JwtUtil {
     @Value("${security.jwt.expiration}")
     private Long expiration;
 
-    public String generateToken(Map<String, Object> claims, String email){
+    public String generateToken(Map<String, Object> claims, String email) {
+        long nowMillis = System.currentTimeMillis();
+        Date now = new Date(nowMillis);
+    
         return Jwts.builder()
-        .setClaims(claims)
-        .setSubject(email)
-        .setIssuedAt(new Date(System.currentTimeMillis()))
-        .setExpiration(new Date(System.currentTimeMillis() + expiration))
-        .signWith(SignatureAlgorithm.HS256, getSignInKey())
-        .compact();
+            .subject(email)
+            .issuedAt(now)
+            .expiration(new Date(nowMillis + expiration))
+            .signWith(getSignInKey())
+            .claims(claims)
+            .compact();
     }
 
     private SecretKey getSignInKey() {
@@ -44,11 +46,12 @@ public class JwtUtil {
         return claimsResolver.apply(claims);
     }
 
-    private Claims extractAllClaims(String token){
+    private Claims extractAllClaims(String token) {
         return Jwts.parser()
-        .setSigningKey(getSignInKey())
-        .parseClaimsJws(token)
-        .getBody();
+            .verifyWith(getSignInKey())
+            .build()
+            .parseSignedClaims(token)
+            .getPayload();
     }
 
     public boolean isTokenValid(String token, String email){
