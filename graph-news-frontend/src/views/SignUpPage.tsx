@@ -6,6 +6,7 @@ import ErrorResponse from "../model/response/ErrorResponse";
 import { Link, useNavigate } from "react-router-dom";
 import SignUpRequest from "../model/request/SignUpRequest";
 import LoginResponse from "../model/response/LoginResponse";
+import { toast } from "react-toastify";
 
 const SignUpPage: React.FC = () => {
   const navigate = useNavigate();
@@ -35,7 +36,7 @@ const SignUpPage: React.FC = () => {
         navigate("/user/me");
       })
       .catch((error: ErrorResponse) => {
-        alert(error.message);
+        toast.error(error.message);
     });
   }
 

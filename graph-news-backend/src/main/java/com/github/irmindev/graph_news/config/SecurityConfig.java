@@ -7,6 +7,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -34,26 +36,33 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
-            .csrf(AbstractHttpConfigurer::disable) // Deshabilitar CSRF
+            .csrf(AbstractHttpConfigurer::disable)
             .cors(cors -> cors.configurationSource(
                 request -> {
                     var corsConfig = new org.springframework.web.cors.CorsConfiguration();
-                    corsConfig.setAllowedOrigins(List.of("http://localhost:5173"));
+                    corsConfig.addAllowedOriginPattern("*");
                     corsConfig.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE"));
                     corsConfig.setAllowedHeaders(List.of("*"));
                     corsConfig.setAllowCredentials(true);
                     return corsConfig;
                 }
-            )) // Deshabilitar CORS
+            ))
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(HttpMethod.POST, "/api/user/signup", "/api/user/login").permitAll()
-                .requestMatchers(HttpMethod.GET, "/api/user/all").hasRole("ADMIN")
-                .requestMatchers(HttpMethod.DELETE, "/api/user/**").hasRole("ADMIN")
-                .requestMatchers(HttpMethod.PUT, "/api/user/**").hasRole("ADMIN")
                 .anyRequest().authenticated()
             )
+            .sessionManagement(manager -> manager.sessionCreationPolicy(org.springframework.security.config.http.SessionCreationPolicy.STATELESS))
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+            .authenticationProvider(authenticationProvider())
             .build();
+    }
+
+    @Bean
+    public AuthenticationProvider authenticationProvider(){
+        DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
+        provider.setUserDetailsService(userDetailsService);
+        provider.setPasswordEncoder(passwordEncoder());
+        return provider;
     }
     
     @Bean

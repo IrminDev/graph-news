@@ -12,6 +12,7 @@ async function getMe(token: string): Promise<GetUserResponse> {
                 Authorization: `Bearer ${token}`
             }
         });
+        console.log(response.data);
         return response.data;
     } catch (error) {
         if (axios.isAxiosError(error) && error.response) {
@@ -56,6 +57,7 @@ async function getUserById(token: string, id: string): Promise<GetUserResponse> 
         });
         return response.data;
     } catch (error) {
+        console.log(error);
         if (axios.isAxiosError(error) && error.response) {
             throw {
                 message: error.response.data.message
@@ -68,9 +70,13 @@ async function getUserById(token: string, id: string): Promise<GetUserResponse> 
     }
 }
 
-async function updateUser(request: UpdateUserRequest, id: Number): Promise<GetUserResponse> {
+async function updateUser(request: UpdateUserRequest, id: string, token: string): Promise<GetUserResponse> {
     try {
-        const response = await axios.put(`${API_URL}/api/user/${id}`, request);
+        const response = await axios.put(`${API_URL}/api/user/${id}`, request, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
         return response.data;
     } catch (error) {
         if (axios.isAxiosError(error) && error.response) {
@@ -107,5 +113,9 @@ async function deleteUser(token: string, id: string): Promise<GetUserResponse> {
 }
 
 export default {
-    getMe
+    getMe,
+    getAllUsers,
+    getUserById,
+    updateUser,
+    deleteUser
 };

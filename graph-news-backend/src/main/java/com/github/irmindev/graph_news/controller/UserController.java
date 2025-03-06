@@ -4,6 +4,9 @@ import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -46,7 +49,7 @@ public class UserController {
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest loginRequest) throws EntityNotFoundException, IncorrectCredentialsException {
         UserDTO user = userService.login(loginRequest.getEmail(), loginRequest.getPassword());
-        Map<String, Object> payload = Map.of("id", user.getId(), "email", user.getEmail(), "role", user.getRole());
+        Map<String, Object> payload = Map.of("id", user.getId(), "email", user.getEmail(), "role", user.getRole().name());
         String token = jwtUtil.generateToken(payload, user.getEmail());
         return ResponseEntity.ok(new LoginResponse.Success(token, user));
     }
@@ -62,31 +65,17 @@ public class UserController {
 
     @GetMapping("/me")
     public ResponseEntity<GetUserResponse> me(@RequestHeader("Authorization") String token) {
-        String email = jwtUtil.extractClaim(
-            token.replace("Bearer ", ""),
-            claims -> claims.getSubject()
-        );
-
-        String name = jwtUtil.extractClaim(
-            token.replace("Bearer ", ""),
-            claims -> claims.get("name", String.class)
-        );
-
-        Role role = Role.valueOf(jwtUtil.extractClaim(
-            token.replace("Bearer ", ""),
-            claims -> claims.get("role", String.class)
-        ));
-
         Long id = jwtUtil.extractClaim(
             token.replace("Bearer ", ""),
             claims -> claims.get("id", Long.class)
         );
 
-        UserDTO user = new UserDTO(id, name, email, role);
+        UserDTO user = userService.getUser(id);
+
         return ResponseEntity.ok(new GetUserResponse.Success(user));
     }
 
-    @GetMapping("/user/{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<GetUserResponse> getUser(@RequestHeader("Authorization") String token, @PathVariable Long id)
     throws EntityNotFoundException, UnallowedMethodException {
         UserDTO user = userService.getUser(id);
@@ -95,28 +84,42 @@ public class UserController {
             claims -> claims.get("id", Long.class)
         );
 
-        if (user.getId() != idUser) {
+        Role role = jwtUtil.extractClaim(
+            token.replace("Bearer ", ""),
+            claims -> Role.valueOf(claims.get("role", String.class))
+        );
+        
+        if (user.getId() != idUser && role != Role.ADMIN) {
             throw new UnallowedMethodException("You are not allowed to access this resource");
         }
 
         return ResponseEntity.ok(new GetUserResponse.Success(user));
     }
 
-    @GetMapping("/user/all")
+    @GetMapping("/all")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<ListUsersResponse> getAllUsers() {
         return ResponseEntity.ok(new ListUsersResponse.Success(userService.getAllUsers()));
     }
 
-    @DeleteMapping("/user/{id}")
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<UpdateResponse> deleteUser(@PathVariable Long id) throws EntityNotFoundException {
         UserDTO user = userService.deleteUser(id);
         return ResponseEntity.ok(new UpdateResponse.Success(user));
     }
 
-    @PutMapping("/user/{id}")
+    @PutMapping("/{id}")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<UpdateResponse> updateUser(@PathVariable Long id, @RequestBody UpdateUserRequest request)
     throws EntityNotFoundException, AlreadyUsedEmailException {
         UserDTO user = userService.updateUser(id, request);
         return ResponseEntity.ok(new UpdateResponse.Success(user));
+    }
+
+    @GetMapping("/debug")
+    public ResponseEntity<String> debug() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        return ResponseEntity.ok("Current user: " + authentication.getName() + ", Authorities: " + authentication.getAuthorities());
     }
 }

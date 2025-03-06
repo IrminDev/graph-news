@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -31,7 +32,7 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         String token = request.getHeader("Authorization");
 
-        if(token == null || !token.startsWith("Bearer ")) {
+        if (token == null || !token.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
             return;
         }
@@ -40,20 +41,30 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
 
         String email = jwtUtil.extractClaim(token, claims -> claims.getSubject());
 
-        if(email == null) {
+        if (email == null) {
             filterChain.doFilter(request, response);
             return;
         }
 
         UserDetails userDetails = userDetailsService.loadUserByUsername(email);
 
-        if(userDetails == null) {
+        if (userDetails == null) {
             filterChain.doFilter(request, response);
             return;
         }
 
+        // Log the authorities for debugging
+        System.out.println("User authorities: " + userDetails.getAuthorities());
+
         UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+        authentication.setDetails(
+            new WebAuthenticationDetailsSource().buildDetails(request)
+        );
+
         SecurityContextHolder.getContext().setAuthentication(authentication);
+
+        // Log the authentication object
+        System.out.println("Authentication object: " + SecurityContextHolder.getContext().getAuthentication());
 
         filterChain.doFilter(request, response);
     }

@@ -32,6 +32,14 @@ public sealed abstract class SignUpResponse permits
             this.user = user;
             this.token = token;
         }
+
+        public UserDTO getUser() {
+            return user;
+        }
+
+        public String getToken() {
+            return token;
+        }
     }
 
     public static final class AlreadyUsedEmail extends SignUpResponse {

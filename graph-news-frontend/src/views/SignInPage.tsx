@@ -6,6 +6,7 @@ import authService from "../services/auth.service";
 import ErrorResponse from "../model/response/ErrorResponse";
 import LoginResponse from "../model/response/LoginResponse";
 import LoginRequest from "../model/request/LoginRequest";
+import { toast } from "react-toastify";
 
 const SignInPage: React.FC = () => {
   const navigate = useNavigate();
@@ -31,7 +32,7 @@ const SignInPage: React.FC = () => {
         navigate("/user/me");
       })
       .catch((error: ErrorResponse) => {
-        alert(error.message);
+        toast.error(error.message);
     });
   }
 

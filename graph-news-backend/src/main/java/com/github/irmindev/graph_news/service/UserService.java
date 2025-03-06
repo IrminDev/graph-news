@@ -65,7 +65,7 @@ public class UserService {
             throw new EntityNotFoundException();
         }
 
-        if (user.getEmail().equals(request.getEmail())) {
+        if (user.getEmail().equals(request.getEmail()) && user.getId() != id) {
             throw new AlreadyUsedEmailException();
         }
 

@@ -4,12 +4,14 @@ import App from './App'
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import SignInPage from './views/SignInPage'
 import SignUpPage from './views/SignUpPage'
-import UserProfilePage from './views/UserProfilePage'
+import UserProfilePage from './views/user/UserProfilePage'
 import AdminDashboardPage from './views/admin/AdminDashboardPage'
 import UserUpdatePage from './views/admin/UserUpdatePage'
+import { ToastContainer } from 'react-toastify'
 
 createRoot(document.getElementById('root')!).render(
-  <BrowserRouter>
+  <>
+    <BrowserRouter>
     <Routes>
       <Route path="/" element={<App />} />
       <Route path='/sign-in' element={<SignInPage />} />
@@ -19,4 +21,6 @@ createRoot(document.getElementById('root')!).render(
       <Route path='/admin/update/:id' element={<UserUpdatePage/>} />
     </Routes>
   </BrowserRouter>
+  <ToastContainer />
+  </>
 )
