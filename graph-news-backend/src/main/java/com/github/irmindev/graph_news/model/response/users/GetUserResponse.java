@@ -1,4 +1,4 @@
-package com.github.irmindev.graph_news.model.response;
+package com.github.irmindev.graph_news.model.response.users;
 
 import com.github.irmindev.graph_news.model.dto.UserDTO;
 

@@ -1,4 +1,4 @@
-package com.github.irmindev.graph_news.model.request;
+package com.github.irmindev.graph_news.model.request.auth;
 
 public class LoginRequest {
     private String email;

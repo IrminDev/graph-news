@@ -5,7 +5,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import com.github.irmindev.graph_news.model.exception.AlreadyUsedEmailException;
-import com.github.irmindev.graph_news.model.response.UpdateResponse;
+import com.github.irmindev.graph_news.model.response.users.UpdateResponse;;
 
 @RestControllerAdvice
 public class AlreadyUsedEmailExceptionHandler {

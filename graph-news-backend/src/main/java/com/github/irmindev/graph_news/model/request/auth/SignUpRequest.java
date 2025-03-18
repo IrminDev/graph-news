@@ -1,21 +1,17 @@
-package com.github.irmindev.graph_news.model.request;
+package com.github.irmindev.graph_news.model.request.auth;
 
-import com.github.irmindev.graph_news.model.enums.Role;
-
-public class UpdateUserRequest {
+public class SignUpRequest {
     private String email;
     private String name;
     private String password;
-    private Role role;
 
-    public UpdateUserRequest() {
+    public SignUpRequest() {
     }
 
-    public UpdateUserRequest(String email, String name, String password, Role role) {
+    public SignUpRequest(String email, String name, String password) {
         this.email = email;
         this.name = name;
         this.password = password;
-        this.role = role;
     }
 
     public String getEmail() {
@@ -40,13 +36,5 @@ public class UpdateUserRequest {
 
     public void setPassword(String password) {
         this.password = password;
-    }
-
-    public Role getRole() {
-        return role;
-    }
-
-    public void setRole(Role role) {
-        this.role = role;
     }
 }

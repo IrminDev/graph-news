@@ -5,7 +5,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import com.github.irmindev.graph_news.model.exception.IncorrectCredentialsException;
-import com.github.irmindev.graph_news.model.response.LoginResponse;
+import com.github.irmindev.graph_news.model.response.auth.LoginResponse;
 
 @RestControllerAdvice
 public class IncorrectCredentialsExceptionHandler {
