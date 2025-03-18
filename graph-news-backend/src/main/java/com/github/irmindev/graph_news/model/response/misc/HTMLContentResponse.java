@@ -1,4 +1,4 @@
-package com.github.irmindev.graph_news.model.response;
+package com.github.irmindev.graph_news.model.response.misc;
 
 import com.github.irmindev.graph_news.model.dto.URLContentDTO;
 import com.github.irmindev.graph_news.model.exception.ResourceNotFoundException;

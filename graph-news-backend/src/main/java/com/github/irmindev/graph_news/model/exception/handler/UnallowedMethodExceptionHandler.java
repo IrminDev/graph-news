@@ -5,7 +5,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import com.github.irmindev.graph_news.model.exception.UnallowedMethodException;
-import com.github.irmindev.graph_news.model.response.GetUserResponse;
+import com.github.irmindev.graph_news.model.response.users.GetUserResponse;;
 
 @RestControllerAdvice
 public class UnallowedMethodExceptionHandler {

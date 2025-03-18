@@ -12,8 +12,8 @@ import com.github.irmindev.graph_news.model.exception.AlreadyUsedEmailException;
 import com.github.irmindev.graph_news.model.exception.EntityNotFoundException;
 import com.github.irmindev.graph_news.model.exception.IncorrectCredentialsException;
 import com.github.irmindev.graph_news.model.mapper.UserMapper;
-import com.github.irmindev.graph_news.model.request.SignUpRequest;
-import com.github.irmindev.graph_news.model.request.UpdateUserRequest;
+import com.github.irmindev.graph_news.model.request.auth.SignUpRequest;
+import com.github.irmindev.graph_news.model.request.user.UpdateUserRequest;
 import com.github.irmindev.graph_news.repository.UserRepository;
 
 @Service

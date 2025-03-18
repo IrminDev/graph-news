@@ -5,14 +5,45 @@ import { Button } from "./components/Button";
 import { Input } from "./components/Input";
 import { Card } from "./components/Card";
 import { Link } from "react-router-dom";
+import userService from "./services/user.service";
+import User from "./model/User";
+import GetUserResponse from "./model/response/GetUserResponse";
+import Loading from "./components/Loading";
 
 const App: React.FC = () => {
+  const [loading, setLoading] = React.useState(true);
+  const [user, setUser] = React.useState<User | null>(null);
+
+  const token = localStorage.getItem("token");
+
+  React.useEffect(() => {
+    if(token){
+      userService.getMe(token).then((response: GetUserResponse) => {
+        setUser(response.user);
+        setLoading(false);
+      }).catch((error) => {
+        console.log(error);
+        setLoading(false);
+      });
+    }
+
+    setLoading(false);
+  }, [token]);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-900 to-purple-800 text-white p-6">
-      <Header />
-      <HeroSection />
-      <NewsSection />
-      <Footer />
+      {
+        loading ? (
+          <Loading />
+        ) : (
+          <>
+            <Header />
+            <HeroSection user={user} />
+            <NewsSection />
+            <Footer />
+          </>
+        )
+      }
     </div>
   );
 };
@@ -26,7 +57,7 @@ const Header: React.FC = () => (
   </header>
 );
 
-const HeroSection: React.FC = () => (
+const HeroSection: React.FC<{user: User | null}> = ({user}) => (
   <main className="mt-12 flex flex-col items-center text-center">
     <motion.h2 
       className="text-4xl font-semibold mb-4"
@@ -39,6 +70,35 @@ const HeroSection: React.FC = () => (
     <p className="text-lg text-white/80 max-w-2xl">
       Our AI-powered platform processes news and generates interactive knowledge graphs for better insights.
     </p>
+    
+    {
+      user ? (
+        <div className="mt-8">
+          <p>
+            <strong>Join our community of contributors.</strong>
+          </p>
+          <p>
+            Upload your notes and help us build a better knowledge graph.
+          </p>
+          <Link to="/upload">
+            <Button className="mt-2 bg-blue-700 hover:bg-blue-600 transition-all ease-in-out hover:scale-110 text-white px-4 py-2 rounded-xl">Upload a note</Button>
+          </Link>
+        </div>
+      ) : (
+        <div className="mt-8">
+          <p>
+            <strong>Ready to contribute?</strong>
+          </p>
+          <p>
+            Join our community of contributors and help us build a better knowledge graph.
+          </p>
+          <Link to="/sign-up">
+            <Button className="mt-2 bg-blue-700 hover:bg-blue-600 transition-all ease-in-out hover:scale-110 text-white px-4 py-2 rounded-xl">Sign up</Button>
+          </Link>
+        </div>
+      )
+    }
+
     <SearchBar />
   </main>
 );
