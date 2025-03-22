@@ -1,9 +1,10 @@
 package com.github.irmindev.graph_news.utils;
 
 import org.springframework.stereotype.Component;
-import com.github.irmindev.graph_news.model.exception.HTMLInvalidFormat;
 
-import com.github.irmindev.graph_news.model.dto.URLContentDTO;
+import com.github.irmindev.graph_news.model.dto.NewsDTO;
+import com.github.irmindev.graph_news.model.exception.news.HTMLInvalidFormatException;
+
 import static java.lang.Boolean.FALSE;
 import static java.lang.Boolean.TRUE;
 
@@ -14,7 +15,7 @@ public class HTMLSanitizer {
     //It only search the h1 tag and all the p tags
     //And also doesn't consider if there is an '>' or an '<' character in the content
     //It assumes that '<' and '>' are part of a tag
-    public URLContentDTO sanitize(String html) throws HTMLInvalidFormat{
+    public NewsDTO sanitize(String html) throws HTMLInvalidFormatException{
         StringBuilder title = new StringBuilder();
         StringBuilder content = new StringBuilder();
         StringBuilder tag = new StringBuilder();
@@ -84,8 +85,8 @@ public class HTMLSanitizer {
             content.append(c);
         }
         if(title.toString().equals("") || content.toString().equals("")){
-            throw new HTMLInvalidFormat();
+            throw new HTMLInvalidFormatException();
         }
-        return new URLContentDTO("", title.toString(), content.toString());
+        return new NewsDTO(null, title.toString(), content.toString());
     }
 }

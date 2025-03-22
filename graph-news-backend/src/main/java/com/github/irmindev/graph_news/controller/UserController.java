@@ -19,10 +19,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.github.irmindev.graph_news.model.dto.UserDTO;
 import com.github.irmindev.graph_news.model.enums.Role;
-import com.github.irmindev.graph_news.model.exception.AlreadyUsedEmailException;
 import com.github.irmindev.graph_news.model.exception.EntityNotFoundException;
-import com.github.irmindev.graph_news.model.exception.IncorrectCredentialsException;
 import com.github.irmindev.graph_news.model.exception.UnallowedMethodException;
+import com.github.irmindev.graph_news.model.exception.user.AlreadyUsedEmailException;
+import com.github.irmindev.graph_news.model.exception.user.IncorrectCredentialsException;
 import com.github.irmindev.graph_news.model.request.auth.LoginRequest;
 import com.github.irmindev.graph_news.model.request.auth.SignUpRequest;
 import com.github.irmindev.graph_news.model.request.user.UpdateUserRequest;
