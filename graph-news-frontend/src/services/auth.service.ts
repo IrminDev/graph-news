@@ -1,8 +1,8 @@
 import axios from "axios";
-import LoginResponse from "../model/response/LoginResponse";
+import LoginResponse from "../model/response/user/LoginResponse";
 import ErrorResponse from "../model/response/ErrorResponse";
-import LoginRequest from "../model/request/LoginRequest";
-import SignUpRequest from "../model/request/SignUpRequest";
+import LoginRequest from "../model/request/user/LoginRequest";
+import SignUpRequest from "../model/request/user/SignUpRequest";
 const API_URL = import.meta.env.VITE_API_URL as string || "http://localhost:8080"; 
 
 async function login(request: LoginRequest): Promise<LoginResponse> {

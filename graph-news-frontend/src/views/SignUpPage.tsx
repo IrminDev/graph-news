@@ -4,8 +4,8 @@ import { Network, Check, AlertCircle, User, Mail, Lock, ArrowLeft } from "lucide
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import authService from "../services/auth.service";
-import SignUpRequest from "../model/request/SignUpRequest";
-import LoginResponse from "../model/response/LoginResponse";
+import SignUpRequest from "../model/request/user/SignUpRequest";
+import LoginResponse from "../model/response/user/LoginResponse";
 import ErrorResponse from "../model/response/ErrorResponse";
 
 const SignUpPage: React.FC = () => {

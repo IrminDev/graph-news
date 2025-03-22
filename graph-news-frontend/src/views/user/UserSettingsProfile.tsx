@@ -1,15 +1,14 @@
 import React, { useState, useEffect, useRef } from "react";
-import { motion } from "framer-motion";
 import { 
-  User, Mail, Key, ArrowLeft, Camera, Shield, Save, 
-  CheckCircle, AlertCircle, Info, Loader2, UploadCloud, X
+  User, Mail, Key, ArrowLeft, Shield, Save, 
+  CheckCircle, AlertCircle, Info, Loader2
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import userService from "../../services/user.service";
 import UserHeader from "../../components/user/UserHeader";
 import Loading from "../../components/Loading";
-import GetUserResponse from "../../model/response/GetUserResponse";
+import GetUserResponse from "../../model/response/user/GetUserResponse";
 import ErrorResponse from "../../model/response/ErrorResponse";
 
 const UserSettingsPage: React.FC = () => {

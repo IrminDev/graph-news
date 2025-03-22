@@ -3,13 +3,12 @@ import { motion } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { 
-  User, PlusCircle, Settings, Calendar, ArrowUpRight, 
-  Newspaper, Filter, Trash2, Edit
+  User, PlusCircle, Settings, Calendar, ArrowUpRight, Filter, Trash2, Edit
 } from "lucide-react";
 import UserHeader from "../../components/user/UserHeader";
 import Loading from "../../components/Loading";
 import userService from "../../services/user.service";
-import GetUserResponse from "../../model/response/GetUserResponse";
+import GetUserResponse from "../../model/response/user/GetUserResponse";
 import ErrorResponse from "../../model/response/ErrorResponse";
 
 // Mock news data for placeholders

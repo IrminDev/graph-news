@@ -1,12 +1,11 @@
 package com.github.irmindev.graph_news.model.entity;
 
-import org.checkerframework.checker.units.qual.C;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.ManyToOne;
 
 @Entity
 public class News {
@@ -20,12 +19,16 @@ public class News {
     @Column(nullable = false)
     private String content;
 
+    @ManyToOne
+    private User author;
+
     public News() {
     }
 
-    public News(String title, String content) {
+    public News(String title, String content, User author) {
         this.title = title;
         this.content = content;
+        this.author = author;
     }
 
     public Long getId() {
@@ -46,5 +49,13 @@ public class News {
 
     public void setContent(String content) {
         this.content = content;
+    }
+
+    public User getAuthor() {
+        return author;
+    }
+
+    public void setAuthor(User author) {
+        this.author = author;
     }
 }

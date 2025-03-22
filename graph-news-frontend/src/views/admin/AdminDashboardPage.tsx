@@ -2,7 +2,7 @@ import React, { useState, useEffect} from "react";
 import { Button } from "../../components/Button";
 import { Link, useNavigate } from "react-router-dom";
 import userService from "../../services/user.service";
-import ListUserResponse from "../../model/response/ListUserResponse";
+import ListUserResponse from "../../model/response/user/ListUserResponse";
 import User from "../../model/User";
 import Loading from "../../components/Loading";
 import ErrorResponse from "../../model/response/ErrorResponse";

@@ -1,8 +1,8 @@
 import axios from "axios";
-import GetUserResponse from "../model/response/GetUserResponse";
+import GetUserResponse from "../model/response/user/GetUserResponse";
 import ErrorResponse from "../model/response/ErrorResponse";
-import ListUserResponse from "../model/response/ListUserResponse";
-import UpdateUserRequest from "../model/request/UpdateUserRequest";
+import ListUserResponse from "../model/response/user/ListUserResponse";
+import UpdateUserRequest from "../model/request/user/UpdateUserRequest";
 const API_URL = import.meta.env.VITE_API_URL as string || "http://localhost:8080"; 
 
 async function getMe(token: string): Promise<GetUserResponse> {

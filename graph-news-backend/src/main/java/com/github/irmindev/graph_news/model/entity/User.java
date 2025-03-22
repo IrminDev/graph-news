@@ -13,9 +13,11 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
 @Entity
@@ -40,6 +42,9 @@ public class User implements UserDetails {
 
     @Column(nullable = false)
     private Boolean isActive = true;
+
+    @OneToMany(mappedBy = "author", fetch = FetchType.LAZY)
+    private List<News> news;
 
     public User() {
     }
@@ -93,6 +98,14 @@ public class User implements UserDetails {
 
     public void setIsActive(Boolean isActive) {
         this.isActive = isActive;
+    }
+
+    public List<News> getNews() {
+        return news;
+    }
+
+    public void setNews(List<News> news) {
+        this.news = news;
     }
 
     @Override

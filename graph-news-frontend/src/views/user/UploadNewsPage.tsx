@@ -10,7 +10,7 @@ import { toast } from "react-toastify";
 import userService from "../../services/user.service";
 import UserHeader from "../../components/user/UserHeader";
 import Loading from "../../components/Loading";
-import GetUserResponse from "../../model/response/GetUserResponse";
+import GetUserResponse from "../../model/response/user/GetUserResponse";
 import ErrorResponse from "../../model/response/ErrorResponse";
 
 const UploadNewsPage: React.FC = () => {

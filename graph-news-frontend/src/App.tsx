@@ -4,7 +4,7 @@ import { Search, Network, Brain, Newspaper, Zap, GitBranch, Lock, Globe, Moon, S
 import { Link } from "react-router-dom";
 import userService from "./services/user.service";
 import User from "./model/User";
-import GetUserResponse from "./model/response/GetUserResponse";
+import GetUserResponse from "./model/response/user/GetUserResponse";
 
 // Custom button component
 const Button: React.FC<React.ButtonHTMLAttributes<HTMLButtonElement> & { className?: string; children?: React.ReactNode }> = ({ children, className, ...props }) => (

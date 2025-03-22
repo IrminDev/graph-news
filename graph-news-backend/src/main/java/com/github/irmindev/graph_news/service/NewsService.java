@@ -10,6 +10,7 @@ import java.io.OutputStream;
 import java.net.URI;
 import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
+import java.util.Optional;
 
 import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.pdmodel.PDDocument;
@@ -21,23 +22,29 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.github.irmindev.graph_news.model.dto.NewsDTO;
 import com.github.irmindev.graph_news.model.entity.News;
+import com.github.irmindev.graph_news.model.entity.User;
+import com.github.irmindev.graph_news.model.exception.EntityNotFoundException;
 import com.github.irmindev.graph_news.model.exception.ResourceNotFoundException;
 import com.github.irmindev.graph_news.model.exception.news.FileIssueException;
+import com.github.irmindev.graph_news.model.mapper.UserMapper;
 import com.github.irmindev.graph_news.repository.NewsRepository;
+import com.github.irmindev.graph_news.repository.UserRepository;
 import com.github.irmindev.graph_news.utils.HTMLSanitizer;
 
 @Service
 public class NewsService {
     private final HTMLSanitizer htmlSanitizer;
     private final NewsRepository newsRepository;
+    private final UserRepository userRepository;
 
     @Autowired
-    public NewsService(HTMLSanitizer htmlSanitizer, NewsRepository newsRepository) {
+    public NewsService(HTMLSanitizer htmlSanitizer, NewsRepository newsRepository, UserRepository userRepository) {
         this.htmlSanitizer = htmlSanitizer;
         this.newsRepository = newsRepository;
+        this.userRepository = userRepository;
     }
 
-    public NewsDTO createFromUrl(String url) throws ResourceNotFoundException {
+    public NewsDTO createFromUrl(String url, Long authorId) throws ResourceNotFoundException {
         StringBuilder source = new StringBuilder();
         URLConnection connection = null;
         try {
@@ -51,10 +58,11 @@ public class NewsService {
         } catch (Exception e) {
             throw new ResourceNotFoundException("Resource not found");
         }
-        return htmlSanitizer.sanitize(source.toString());
+        NewsDTO newsDTO = htmlSanitizer.sanitize(source.toString());
+        return createNews(newsDTO.getTitle(), newsDTO.getContent(), authorId);
     }
 
-    public NewsDTO createFromPdf(MultipartFile file, String title) throws FileIssueException{
+    public NewsDTO createFromPdf(MultipartFile file, String title, Long authorId) throws FileIssueException{
         File pdfFile = new File("file.tmp");
         try (OutputStream os = new FileOutputStream(pdfFile)){
             os.write(file.getBytes());
@@ -66,24 +74,24 @@ public class NewsService {
         try (PDDocument document = Loader.loadPDF(pdfFile)){
             PDFTextStripper stripper = new PDFTextStripper();
             String content = stripper.getText(document);
-            return createNews(title, content);
+            return createNews(title, content, authorId);
         } catch (IOException e) {
             e.printStackTrace();
             throw new FileIssueException(e.getMessage());
         }
     }
 
-    public NewsDTO createFromTxt(MultipartFile file, String title) throws FileIssueException{
+    public NewsDTO createFromTxt(MultipartFile file, String title, Long authorId) throws FileIssueException{
         try {
             String content = new String(file.getBytes(), StandardCharsets.UTF_8);
-            return createNews(title, content);
+            return createNews(title, content, authorId);
         } catch (IOException e) {
             e.printStackTrace();
             throw new FileIssueException(e.getMessage());
         }
     }
 
-    public NewsDTO createFromDocx(MultipartFile file, String title) throws FileIssueException{
+    public NewsDTO createFromDocx(MultipartFile file, String title, Long authorId) throws FileIssueException{
         File docxFile = new File("file.tmp");
         try (OutputStream os = new FileOutputStream(docxFile)){
             os.write(file.getBytes());
@@ -99,16 +107,20 @@ public class NewsService {
                 sb.append(b);
                 return sb.toString();
             });
-            return createNews(title, content);
+            return createNews(title, content, authorId);
         } catch (IOException e) {
             e.printStackTrace();
             throw new FileIssueException(e.getMessage());
         }
     }
 
-    public NewsDTO createNews(String title, String content){
-        News newDocument = new News(title, content);
+    public NewsDTO createNews(String title, String content, Long authorId) throws EntityNotFoundException{
+        Optional<User> author = userRepository.findById(authorId);
+        if (author.isEmpty()) {
+            throw new EntityNotFoundException();
+        }
+        News newDocument = new News(title, content, author.get());
         News savedDocument = newsRepository.save(newDocument);
-        return new NewsDTO(savedDocument.getId(), savedDocument.getTitle(), savedDocument.getContent());
+        return new NewsDTO(savedDocument.getId(), savedDocument.getTitle(), savedDocument.getContent(), UserMapper.toDto(author.get()));
     }
 }

@@ -87,6 +87,6 @@ public class HTMLSanitizer {
         if(title.toString().equals("") || content.toString().equals("")){
             throw new HTMLInvalidFormatException();
         }
-        return new NewsDTO(null, title.toString(), content.toString());
+        return new NewsDTO(null, title.toString(), content.toString(), null);
     }
 }
