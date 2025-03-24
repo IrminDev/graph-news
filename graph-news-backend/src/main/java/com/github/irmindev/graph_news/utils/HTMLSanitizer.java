@@ -1,92 +1,88 @@
 package com.github.irmindev.graph_news.utils;
 
 import org.springframework.stereotype.Component;
-
 import com.github.irmindev.graph_news.model.dto.NewsDTO;
 import com.github.irmindev.graph_news.model.exception.news.HTMLInvalidFormatException;
 
-import static java.lang.Boolean.FALSE;
-import static java.lang.Boolean.TRUE;
-
 @Component
 public class HTMLSanitizer {
-    //This is the first version of the HTML Sanitizer
-    //It is a basic Sanitizer that doesn't validate all the possible configuration
-    //It only search the h1 tag and all the p tags
-    //And also doesn't consider if there is an '>' or an '<' character in the content
-    //It assumes that '<' and '>' are part of a tag
-    public NewsDTO sanitize(String html) throws HTMLInvalidFormatException{
-        StringBuilder title = new StringBuilder();
-        StringBuilder content = new StringBuilder();
-        StringBuilder tag = new StringBuilder();
-        boolean ontitle = FALSE;
-        boolean ontag = FALSE;
-        boolean oncontent = FALSE;
-        int length = html.length();
-        char c;
-        for(int i = 0; i < length; ++ i){
-            c = html.charAt(i);
-            //It is a new tag
-            if(c == '<'){
-                ontag = TRUE;
-                tag = new StringBuilder();
-                continue;
-            }
-            if(c == '\n') continue;
-            if(c == '>'){
-                ontag = FALSE;
-                if(tag.length() == 0) continue;
-                //The tag is closed
-                if(tag.charAt(0) == '/'){
-                    //verifying that is the end of the title
-                    if(tag.length() >= 3){
-                        if(tag.charAt(1) == 'h' && tag.charAt(2) == '1'){
-                            ontitle = FALSE;
-                            continue;
-                        }
-                    }
-                    //verifying that is the end of a paragraph
-                    if(tag.length() >= 2){
-                        if(tag.charAt(1) == 'p'){
-                            if(tag.length() > 2){
-                                if(tag.charAt(2) != ' ') continue;
-                                oncontent = FALSE;
-                            }
-                            continue;
-                        }
-                    }
-                    continue;
-                }
-                if(tag.length() >= 1){
-                    if(tag.charAt(0) == 'p'){
-                        if(tag.length() > 1){
-                            if(tag.charAt(1) != ' ') continue;
-                        }
-                        oncontent = TRUE;
-                    }
-                }
-                if(tag.length() >= 2){
-                    if(tag.charAt(0) == 'h' && tag.charAt(1) == '1'){
-                        ontitle = TRUE;
-                        continue;
-                    }
-                }
-                continue;
-            }
-            if(ontag){
-                tag.append(c);
-                continue;
-            }
-            if(!ontitle && !oncontent) continue;
-            if(ontitle){
-                title.append(c);
-                continue;
-            }
-            content.append(c);
-        }
-        if(title.toString().equals("") || content.toString().equals("")){
+
+    public NewsDTO sanitize(String html) throws HTMLInvalidFormatException {
+        String title = extractTitle(html);
+        String content = extractContent(html);
+
+        if (title.isEmpty() || content.isEmpty()) {
             throw new HTMLInvalidFormatException();
         }
-        return new NewsDTO(null, title.toString(), content.toString(), null);
+
+        return new NewsDTO(null, title, content, null);
+    }
+
+    private String extractTitle(String html) {
+        // Extract the content of the <title> tag
+        int titleStart = html.indexOf("<title>");
+        int titleEnd = html.indexOf("</title>");
+
+        if (titleStart == -1 || titleEnd == -1) {
+            return ""; // No title tag found
+        }
+
+        // Extract the title content
+        return html.substring(titleStart + 7, titleEnd).trim();
+    }
+
+    private String extractContent(String html) {
+        StringBuilder content = new StringBuilder();
+        int startIndex = 0;
+
+        // Loop through all <p> tags
+        while (true) {
+            int pStart = html.indexOf("<p", startIndex);
+            if (pStart == -1) {
+                break; // No more <p> tags found
+            }
+
+            int pEnd = html.indexOf("</p>", pStart);
+            if (pEnd == -1) {
+                break; // No closing </p> tag found
+            }
+
+            // Extract the content inside the <p> tag
+            String paragraph = html.substring(pStart, pEnd);
+            int contentStart = paragraph.indexOf(">") + 1;
+            String paragraphContent = paragraph.substring(contentStart).trim();
+
+            // Remove all inner tags (e.g., <b>, <span>, <a>, etc.)
+            String plainText = removeInnerTags(paragraphContent);
+
+            // Append the plain text to the result
+            if (!plainText.isEmpty()) {
+                content.append(plainText).append("\n");
+            }
+
+            // Move the start index to the end of the current <p> tag
+            startIndex = pEnd + 4;
+        }
+
+        return content.toString().trim();
+    }
+
+    private String removeInnerTags(String html) {
+        StringBuilder plainText = new StringBuilder();
+        boolean insideTag = false;
+
+        for (int i = 0; i < html.length(); i++) {
+            char c = html.charAt(i);
+
+            if (c == '<') {
+                insideTag = true; // Start of a tag
+            } else if (c == '>') {
+                insideTag = false; // End of a tag
+            } else if (!insideTag) {
+                plainText.append(c); // Append only text outside tags
+            }
+        }
+
+        return plainText.toString().trim();
     }
 }

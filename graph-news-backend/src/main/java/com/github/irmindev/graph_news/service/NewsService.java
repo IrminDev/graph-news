@@ -1,14 +1,10 @@
 package com.github.irmindev.graph_news.service;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.net.URI;
-import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 
@@ -19,6 +15,10 @@ import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
 
 import com.github.irmindev.graph_news.model.dto.NewsDTO;
 import com.github.irmindev.graph_news.model.entity.News;
@@ -45,21 +45,38 @@ public class NewsService {
     }
 
     public NewsDTO createFromUrl(String url, Long authorId) throws ResourceNotFoundException {
-        StringBuilder source = new StringBuilder();
-        URLConnection connection = null;
+        // Configure Chrome to run in headless mode
+        ChromeOptions options = new ChromeOptions();
+        options.addArguments("--headless"); // Run in headless mode
+        options.addArguments("--disable-gpu"); // Disable GPU acceleration
+        options.addArguments("--no-sandbox"); // Required for Docker
+        options.addArguments("--disable-dev-shm-usage"); // Overcome limited resource problems
+
+        // Set the path to ChromeDriver (already installed in the Docker image)
+        System.setProperty("webdriver.chrome.driver", "/usr/bin/chromedriver");
+
+        // Initialize the WebDriver
+        WebDriver driver = new ChromeDriver(options);
+
         try {
-            connection = new URI(url).toURL().openConnection();
-            BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-            String inputLine;
-            while ((inputLine = in.readLine()) != null) {
-                source.append(inputLine);
-            }
-            in.close();
+            // Navigate to the URL
+            driver.get(url);
+
+            // Wait for the page to load (you can use explicit waits for dynamic content)
+            Thread.sleep(2000); // Adjust the sleep time as needed
+
+            // Get the fully rendered HTML
+            String html = driver.getPageSource();
+
+            // Sanitize the HTML and create the NewsDTO
+            NewsDTO newsDTO = htmlSanitizer.sanitize(html);
+            return createNews(newsDTO.getTitle(), newsDTO.getContent(), authorId);
         } catch (Exception e) {
-            throw new ResourceNotFoundException("Resource not found");
+            throw new ResourceNotFoundException("Failed to fetch resource: " + e.getMessage());
+        } finally {
+            // Close the browser
+            driver.quit();
         }
-        NewsDTO newsDTO = htmlSanitizer.sanitize(source.toString());
-        return createNews(newsDTO.getTitle(), newsDTO.getContent(), authorId);
     }
 
     public NewsDTO createFromPdf(MultipartFile file, String title, Long authorId) throws FileIssueException{

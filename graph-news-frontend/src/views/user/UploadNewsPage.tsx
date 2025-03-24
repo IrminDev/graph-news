@@ -8,6 +8,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import userService from "../../services/user.service";
+import { uploadNewsFile, uploadNewsContent, uploadNewsURL } from "../../services/news.service";
 import UserHeader from "../../components/user/UserHeader";
 import Loading from "../../components/Loading";
 import GetUserResponse from "../../model/response/user/GetUserResponse";
@@ -95,9 +96,9 @@ const UploadNewsPage: React.FC = () => {
       // Get only the first file
       const selectedFile = e.target.files[0];
       
-      // Check file size (max 10MB)
-      if (selectedFile.size > 10 * 1024 * 1024) {
-        toast.error("File is too large. Maximum size is 10MB.");
+      // Check file size (max 5MB)
+      if (selectedFile.size > 5 * 1024 * 1024) {
+        toast.error("File is too large. Maximum size is 5MB.");
         return;
       }
       
@@ -112,13 +113,12 @@ const UploadNewsPage: React.FC = () => {
     }
   };
   
-  // Update the replaceFile function to ensure it properly triggers the file dialog
   const replaceFile = () => {
-    console.log("Replace file");
-    console.log(fileInputRef.current);
-    console.log(fileInputRef.current?.files);
-    // First ensure we have a file input reference
-    if(fileInputRef.current) {
+    // First remove the current file to reset state
+    setFile(null);
+    
+    // Then ensure we have a file input reference
+    if (fileInputRef.current) {
       // Clear the file input value
       fileInputRef.current.value = '';
       // Trigger a click event on the file input
@@ -164,12 +164,51 @@ const UploadNewsPage: React.FC = () => {
     
     setSubmitting(true);
     
-    // Simulate API call with a delay
-    setTimeout(() => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      toast.error("You need to login first");
+      setSubmitting(false);
+      navigate("/sign-in");
+      return;
+    }
+    
+    try {
+      // Different approach based on upload type
+      if (uploadType === "url") {
+        // URL-based upload
+        await uploadNewsURL(token, { 
+          title: title,
+          url: url 
+        });
+      } else if (uploadType === "text") {
+        // Content-based upload
+        await uploadNewsContent(token, {
+          title: title,
+          content: content
+        });
+      } else if (uploadType === "file" && file) {
+        // File-based upload
+        const formData = new FormData();
+        
+        // Add the file first
+        formData.append("file", file);
+        
+        // Add the request part (title) as JSON
+        const createNewsWithFile = { title: title };
+        const blob = new Blob([JSON.stringify(createNewsWithFile)], {
+          type: "application/json"
+        });
+        formData.append("request", blob);
+        
+        await uploadNewsFile(token, formData);
+      }
+      
       toast.success("News uploaded successfully! It's now being processed.");
       navigate("/user/profile");
+    } catch (error: any) {
+      toast.error(error.message || "Failed to upload news");
       setSubmitting(false);
-    }, 2000);
+    }
   };
   
   if (loading) {
@@ -452,9 +491,8 @@ const UploadNewsPage: React.FC = () => {
                           <p className={`text-sm ${
                             darkMode ? 'text-slate-400' : 'text-slate-500'
                           }`}>
-                            PDF, DOCX, or TXT (max 10MB)
+                            PDF, DOCX, or TXT (max 5MB)
                           </p>
-                          {/* Remove the input from here */}
                         </div>
                       ) : (
                         // Show selected file details

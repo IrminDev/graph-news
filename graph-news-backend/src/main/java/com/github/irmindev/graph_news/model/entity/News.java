@@ -1,5 +1,7 @@
 package com.github.irmindev.graph_news.model.entity;
 
+import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -16,7 +18,7 @@ public class News {
     @Column(nullable = false)
     private String title;
 
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String content;
 
     @ManyToOne
