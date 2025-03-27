@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { 
-  User, Mail, Key, ArrowLeft, Shield, Save, 
-  CheckCircle, AlertCircle, Info, Loader2
+  User, Mail, Key, ArrowLeft, Camera, Shield, Save, 
+  CheckCircle, AlertCircle, Info, Loader2, Upload, X
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -10,6 +10,10 @@ import UserHeader from "../../components/user/UserHeader";
 import Loading from "../../components/Loading";
 import GetUserResponse from "../../model/response/user/GetUserResponse";
 import ErrorResponse from "../../model/response/ErrorResponse";
+import UpdateMe from "../../model/request/user/UpdateMe";
+import UpdatePassword from "../../model/request/user/UpdatePassword";
+
+const API_URL = import.meta.env.VITE_API_URL as string || "http://localhost:8080";
 
 const UserSettingsPage: React.FC = () => {
   const navigate = useNavigate();
@@ -17,6 +21,7 @@ const UserSettingsPage: React.FC = () => {
   const [saving, setSaving] = useState(false);
   const [changingPassword, setChangingPassword] = useState(false);
   const [user, setUser] = useState<any>(null);
+  const [userImageUrl, setUserImageUrl] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -33,6 +38,7 @@ const UserSettingsPage: React.FC = () => {
   });
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+  const [imageLoaded, setImageLoaded] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [darkMode, setDarkMode] = useState(
     localStorage.getItem("theme") === "dark" || 
@@ -54,6 +60,25 @@ const UserSettingsPage: React.FC = () => {
     setDarkMode(!darkMode);
   };
   
+  // Check if user image exists
+  const fetchUserImage = (userId: string) => {
+    // Use timestamp to prevent caching
+    const timestamp = new Date().getTime();
+    const imageUrl = `${API_URL}/api/user/image/${userId}?t=${timestamp}`;
+    
+    // Create an image element to test if the image exists
+    const img = new Image();
+    img.onload = () => {
+      setUserImageUrl(imageUrl);
+      setImageLoaded(true);
+    };
+    img.onerror = () => {
+      setUserImageUrl(null);
+      setImageLoaded(true);
+    };
+    img.src = imageUrl;
+  };
+  
   // Fetch user data
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -69,15 +94,25 @@ const UserSettingsPage: React.FC = () => {
           id: data.user.id || "",
           name: data.user.name,
           email: data.user.email,
-          role: data.user.role
+          role: data.user.role,
+          // Remove bio field
         };
         
         setUser(userData);
         setFormData({
           ...formData,
           name: userData.name,
-          email: userData.email
+          email: userData.email,
+          // Remove bio field
         });
+        
+        // Once we have the user ID, check for the profile image
+        if (userData.id) {
+          fetchUserImage(userData.id);
+        } else {
+          setImageLoaded(true);
+        }
+        
         setLoading(false);
       })
       .catch((error: ErrorResponse) => {
@@ -153,25 +188,52 @@ const UserSettingsPage: React.FC = () => {
     
     setSaving(true);
     
-    // Simulate API call
-    setTimeout(() => {
-      setUser({
-        ...user,
-        name: formData.name,
-        email: formData.email
-      });
-      
-      // If there was an avatar upload, it would be processed here
-      if (avatarFile) {
-        // This is where you'd handle the avatar upload to your backend
-        // For now, we'll just acknowledge it in the toast
-        toast.success("Profile updated successfully with new avatar!");
-      } else {
-        toast.success("Profile updated successfully!");
-      }
-      
+    const token = localStorage.getItem("token");
+    if (!token) {
+      toast.error("You need to login first");
       setSaving(false);
-    }, 1500);
+      navigate("/sign-in");
+      return;
+    }
+    
+    const updateMeRequest: UpdateMe = {
+      name: formData.name,
+      email: formData.email,
+    };
+    
+    // Use the updated function that handles image upload
+    userService.updateMeWithImage(token, updateMeRequest, avatarFile)
+      .then((response) => {
+        const updatedUser = {
+          ...user,
+          name: response.user.name,
+          email: response.user.email,
+          // Remove bio field
+        };
+        
+        setUser(updatedUser);
+        
+        // Update localStorage with new user info if needed
+        const currentUserInfo = JSON.parse(localStorage.getItem("user") || "{}");
+        if (currentUserInfo && currentUserInfo.id === user.id) {
+          localStorage.setItem("user", JSON.stringify(updatedUser));
+        }
+        
+        // If an avatar was uploaded, refresh the image
+        if (avatarFile) {
+          fetchUserImage(user.id);
+          setAvatarFile(null);
+          setAvatarPreview(null);
+        }
+        
+        toast.success("Profile updated successfully!");
+      })
+      .catch((error: ErrorResponse) => {
+        toast.error(error.message || "Failed to update profile");
+      })
+      .finally(() => {
+        setSaving(false);
+      });
   };
   
   const handlePasswordSubmit = (e: React.FormEvent) => {
@@ -193,22 +255,40 @@ const UserSettingsPage: React.FC = () => {
     
     setChangingPassword(true);
     
-    // Simulate API call
-    setTimeout(() => {
-      toast.success("Password changed successfully!");
+    const token = localStorage.getItem("token");
+    if (!token) {
+      toast.error("You need to login first");
       setChangingPassword(false);
-      
-      // Reset password fields
-      setFormData({
-        ...formData,
-        currentPassword: "",
-        newPassword: "",
-        confirmPassword: ""
+      navigate("/sign-in");
+      return;
+    }
+    
+    const updatePasswordRequest: UpdatePassword = {
+      oldPassword: formData.currentPassword,
+      newPassword: formData.newPassword
+    };
+    
+    userService.updatePassword(token, updatePasswordRequest)
+      .then(() => {
+        toast.success("Password changed successfully!");
+        
+        // Reset password fields
+        setFormData({
+          ...formData,
+          currentPassword: "",
+          newPassword: "",
+          confirmPassword: ""
+        });
+      })
+      .catch((error: ErrorResponse) => {
+        toast.error(error.message || "Failed to update password");
+      })
+      .finally(() => {
+        setChangingPassword(false);
       });
-    }, 1500);
   };
   
-  if (loading) {
+  if (loading || !imageLoaded) {
     return (
       <div className={`min-h-screen flex items-center justify-center transition-colors duration-500 ${
         darkMode 
@@ -272,21 +352,84 @@ const UserSettingsPage: React.FC = () => {
                 <div className="mb-8">
                   <div className="flex flex-col sm:flex-row items-center gap-6">
                     <div className="relative group">
-                      <div className={`w-24 h-24 rounded-full overflow-hidden border-4 ${
-                        darkMode ? 'border-slate-800' : 'border-white'
-                      }`}>
+                    <div className={`w-24 h-24 rounded-full overflow-hidden border-4 ${
+                      darkMode ? 'border-slate-800' : 'border-white'
+                    }`}>
+                      {avatarPreview ? (
+                        <img 
+                          src={avatarPreview} 
+                          alt="Avatar Preview" 
+                          className="w-full h-full object-cover"
+                        />
+                      ) : userImageUrl ? (
+                        <img 
+                          src={userImageUrl} 
+                          alt="Profile" 
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
                         <div className={`w-full h-full flex items-center justify-center text-3xl font-bold ${
-                            darkMode ? 'bg-indigo-600' : 'bg-indigo-500'
-                          } text-white`}>
-                            {user?.name?.charAt(0).toUpperCase()}
-                          </div>
+                          darkMode ? 'bg-indigo-600' : 'bg-indigo-500'
+                        } text-white`}>
+                          {user?.name?.charAt(0).toUpperCase()}
+                        </div>
+                      )}
+                    </div>
+                      
+                      <div 
+                        className={`absolute inset-0 rounded-full flex items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer`}
+                        onClick={() => fileInputRef.current?.click()}
+                      >
+                        <Camera className="w-6 h-6 text-white" />
                       </div>
+                      
+                      <input
+                        type="file"
+                        ref={fileInputRef}
+                        onChange={handleAvatarChange}
+                        accept="image/*"
+                        className="hidden"
+                      />
                     </div>
                     
                     <div>
                       <h3 className={`font-medium text-lg mb-1 ${
                         darkMode ? 'text-white' : 'text-slate-800'
                       }`}>Profile Picture</h3>
+                      <p className={`text-sm mb-3 ${
+                        darkMode ? 'text-slate-400' : 'text-slate-600'
+                      }`}>
+                        JPEG, PNG or GIF. Max size 2MB.
+                      </p>
+                      
+                      <div className="flex space-x-3">
+                        <button
+                          type="button"
+                          onClick={() => fileInputRef.current?.click()}
+                          className={`text-sm px-3 py-1.5 rounded border transition-colors inline-flex items-center ${
+                            darkMode
+                              ? 'bg-slate-800 border-slate-700 text-white hover:bg-slate-700'
+                              : 'bg-white border-slate-300 text-slate-700 hover:bg-slate-50'
+                          }`}
+                        >
+                          Upload
+                        </button>
+                        
+                        {(avatarPreview || userImageUrl) && (
+                          <button
+                            type="button"
+                            onClick={removeAvatar}
+                            className={`text-sm px-3 py-1.5 rounded border transition-colors inline-flex items-center ${
+                              darkMode
+                                ? 'bg-slate-800 border-slate-700 text-red-400 hover:bg-slate-700'
+                                : 'bg-white border-slate-300 text-red-500 hover:bg-slate-50'
+                            }`}
+                          >
+                            <X className="w-4 h-4 mr-1.5" />
+                            Remove
+                          </button>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -369,7 +512,6 @@ const UserSettingsPage: React.FC = () => {
                       <p className="mt-1 text-sm text-red-500">Please enter a valid email address</p>
                     )}
                   </div>
-
                   
                   <div className="pt-3">
                     <button

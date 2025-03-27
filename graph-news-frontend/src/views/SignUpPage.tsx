@@ -71,7 +71,7 @@ const SignUpPage: React.FC = () => {
           localStorage.setItem("user", JSON.stringify(response.user));
           
           toast.success("Account created successfully!");
-          navigate("/user/me");
+          navigate("/user/profile");
         })
         .catch((error: ErrorResponse) => {
           toast.error(error.message || "Failed to create account. Please try again.");

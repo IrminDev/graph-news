@@ -9,6 +9,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import com.github.irmindev.graph_news.model.enums.Role;
 
+import jakarta.persistence.Basic;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -46,14 +47,18 @@ public class User implements UserDetails {
     @OneToMany(mappedBy = "author", fetch = FetchType.LAZY)
     private List<News> news;
 
+    @Column(columnDefinition = "BYTEA")
+    @Basic(fetch = FetchType.LAZY)
+    private byte[] image;
+
     public User() {
     }
 
-    public User(String name, String email, String password, Role role) {
+    public User(String name, String email, String password, Role user) {
         this.name = name;
         this.email = email;
         this.password = password;
-        this.role = role;
+        this.role = user;
     }
 
     public Long getId() {
@@ -106,6 +111,14 @@ public class User implements UserDetails {
 
     public void setNews(List<News> news) {
         this.news = news;
+    }
+
+    public byte[] getImage() {
+        return image;
+    }
+
+    public void setImage(byte[] image) {
+        this.image = image;
     }
 
     @Override

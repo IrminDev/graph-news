@@ -10,6 +10,7 @@ import Loading from "../../components/Loading";
 import userService from "../../services/user.service";
 import GetUserResponse from "../../model/response/user/GetUserResponse";
 import ErrorResponse from "../../model/response/ErrorResponse";
+const API_URL = import.meta.env.VITE_API_URL as string || "http://localhost:8080";
 
 // Mock news data for placeholders
 const mockNews = [
@@ -166,6 +167,9 @@ const UserProfilePage: React.FC = () => {
   });
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("all");
+  // Add state for user profile image
+  const [userImageUrl, setUserImageUrl] = useState<string | null>(null);
+  const [imageLoaded, setImageLoaded] = useState(false);
   const [darkMode, setDarkMode] = useState(
     localStorage.getItem("theme") === "dark" || 
     (!localStorage.getItem("theme") && window.matchMedia("(prefers-color-scheme: dark)").matches)
@@ -187,6 +191,25 @@ const UserProfilePage: React.FC = () => {
     setDarkMode(!darkMode);
   };
   
+  // Check if user image exists
+  const fetchUserImage = (userId: string) => {
+    // Use timestamp to prevent caching
+    const timestamp = new Date().getTime();
+    const imageUrl = `${API_URL}/api/user/image/${userId}?t=${timestamp}`;
+    
+    // Create an image element to test if the image exists
+    const img = new Image();
+    img.onload = () => {
+      setUserImageUrl(imageUrl);
+      setImageLoaded(true);
+    };
+    img.onerror = () => {
+      setUserImageUrl(null);
+      setImageLoaded(true);
+    };
+    img.src = imageUrl;
+  };
+  
   // Fetch user data
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -198,12 +221,22 @@ const UserProfilePage: React.FC = () => {
 
     userService.getMe(token)
       .then((data: GetUserResponse) => {
-        setUser({
+        const userData = {
           id: data.user.id || "",
           name: data.user.name,
           email: data.user.email,
           role: data.user.role,
-        });
+        };
+        
+        setUser(userData);
+        
+        // Once we have the user ID, check for the profile image
+        if (userData.id) {
+          fetchUserImage(userData.id);
+        } else {
+          setImageLoaded(true);
+        }
+        
         setLoading(false);
       })
       .catch((error: ErrorResponse) => {
@@ -221,7 +254,7 @@ const UserProfilePage: React.FC = () => {
     ? mockNews 
     : mockNews.filter(item => item.status.toLowerCase() === filter.toLowerCase());
 
-  if (loading) {
+  if (loading || !imageLoaded) {
     return (
       <div className={`min-h-screen flex items-center justify-center transition-colors duration-500 ${
         darkMode 
@@ -256,10 +289,20 @@ const UserProfilePage: React.FC = () => {
             <div className={`h-40 bg-gradient-to-r from-indigo-600 to-purple-600`}></div>
             <div className="p-6 relative">
               <div className="absolute -top-16 left-6">
-                <div className={`w-32 h-32 rounded-full border-4 flex items-center justify-center text-white text-5xl font-bold ${
-                  darkMode ? 'bg-slate-800 border-slate-900' : 'bg-indigo-600 border-white'
+                <div className={`w-32 h-32 rounded-full overflow-hidden border-4 flex items-center justify-center text-white text-5xl font-bold ${
+                  darkMode ? 'border-slate-900' : 'border-white'
+                } ${
+                  userImageUrl ? '' : (darkMode ? 'bg-slate-800' : 'bg-indigo-600')
                 }`}>
-                  {user?.name?.charAt(0).toUpperCase()}
+                  {userImageUrl ? (
+                    <img 
+                      src={userImageUrl} 
+                      alt={user?.name || "Profile"} 
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    user?.name?.charAt(0).toUpperCase()
+                  )}
                 </div>
               </div>
               

@@ -1,6 +1,6 @@
 package com.github.irmindev.graph_news.model.entity;
 
-import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
+import java.util.Date;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -23,6 +23,9 @@ public class News {
 
     @ManyToOne
     private User author;
+
+    @Column(nullable = false)
+    private Date createdAt = new Date(System.currentTimeMillis());
 
     public News() {
     }

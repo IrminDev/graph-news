@@ -1,16 +1,16 @@
 import React, { useState, useEffect } from "react";
-import { useParams, useNavigate, Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { 
-  User as UserIcon, Mail, Shield, ArrowLeft, Save, Loader2, 
-  Moon, Sun, Network, AlertCircle
+  User, Mail, Shield, ArrowLeft, Save, Loader2, AlertCircle, Lock, Eye, EyeOff
 } from "lucide-react";
+
 import AdminHeader from "../../components/admin/AdminHeader";
 import userService from "../../services/user.service";
 import Loading from "../../components/Loading";
 import GetUserResponse from "../../model/response/user/GetUserResponse";
 import ErrorResponse from "../../model/response/ErrorResponse";
-import UpdateUserRequest from "../../model/request/user/UpdateUserRequest";
+import CreateUserRequest from "../../model/request/user/CreateUserRequest";
 
 const API_URL = import.meta.env.VITE_API_URL as string || "http://localhost:8080";
 
@@ -66,26 +66,24 @@ const Card: React.FC<{
   </div>
 );
 
-const UserUpdatePage: React.FC = () => {
-  const { id } = useParams<{ id: string }>();
+const CreateUserPage: React.FC = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [currentAdmin, setCurrentAdmin] = useState<any>(null);
-  const [userImageUrl, setUserImageUrl] = useState<string | null>(null);
-  const [imageLoaded, setImageLoaded] = useState(false);
-
-  const activeTab = "users";
+  const [showPassword, setShowPassword] = useState(false);
 
   const [formData, setFormData] = useState({
     name: "",
     email: "",
-    role: 0, // Default to USER (0)
+    password: "",
+    role: "USER" // Default to USER
   });
 
   const [errors, setErrors] = useState({
     name: false,
-    email: false
+    email: false,
+    password: false
   });
 
   const [darkMode, setDarkMode] = useState(
@@ -108,26 +106,7 @@ const UserUpdatePage: React.FC = () => {
     setDarkMode(!darkMode);
   };
 
-  // Check if user image exists
-  const fetchUserImage = (userId: string) => {
-    // Use timestamp to prevent caching
-    const timestamp = new Date().getTime();
-    const imageUrl = `${API_URL}/api/user/image/${userId}?t=${timestamp}`;
-    
-    // Create an image element to test if the image exists
-    const img = new Image();
-    img.onload = () => {
-      setUserImageUrl(imageUrl);
-      setImageLoaded(true);
-    };
-    img.onerror = () => {
-      setUserImageUrl(null);
-      setImageLoaded(true);
-    };
-    img.src = imageUrl;
-  };
-
-  // Check admin authorization and fetch user data
+  // Check admin authorization
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (!token) {
@@ -136,7 +115,7 @@ const UserUpdatePage: React.FC = () => {
       return;
     }
 
-    // First check if the current user is an admin
+    // Check if the current user is an admin
     userService.getMe(token)
       .then((data: GetUserResponse) => {
         if (data.user.role !== "ADMIN") {
@@ -146,58 +125,26 @@ const UserUpdatePage: React.FC = () => {
         }
 
         setCurrentAdmin(data.user);
-
-        // Now fetch the user to update
-        if (id) {
-          userService.getUserById(token, id)
-            .then((userData: GetUserResponse) => {
-              // Convert role string to number for form
-              const roleNumber = userData.user.role === "ADMIN" ? 1 : 0;
-              
-              setFormData({
-                name: userData.user.name,
-                email: userData.user.email,
-                role: roleNumber
-              });
-              
-              // Check for user image
-              if (userData.user.id) {
-                fetchUserImage(userData.user.id);
-              } else {
-                setImageLoaded(true);
-              }
-              
-              setLoading(false);
-            })
-            .catch((error: ErrorResponse) => {
-              toast.error(error.message || "Failed to fetch user");
-              navigate("/admin/dashboard");
-            });
-        } else {
-          setLoading(false);
-          setImageLoaded(true);
-          toast.error("No user ID provided");
-          navigate("/admin/dashboard");
-        }
+        setLoading(false);
       })
       .catch((error: ErrorResponse) => {
         toast.error(error.message || "Authentication error");
         navigate("/sign-in");
       });
-  }, [id, navigate]);
+  }, [navigate]);
 
   const validateEmail = (email: string) => {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   };
 
+  const validatePassword = (password: string) => {
+    return password.length >= 8;
+  };
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     
-    if (name === "role") {
-      setFormData({ ...formData, [name]: parseInt(value) });
-    } else {
-      setFormData({ ...formData, [name]: value });
-    }
+    setFormData({ ...formData, [name]: value });
     
     // Clear error when typing
     if (name in errors) {
@@ -208,15 +155,16 @@ const UserUpdatePage: React.FC = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Validate name and email
+    // Validate form fields
     const newErrors = {
       name: formData.name.trim().length < 3,
-      email: !validateEmail(formData.email)
+      email: !validateEmail(formData.email),
+      password: !validatePassword(formData.password)
     };
     
     setErrors(newErrors);
     
-    if (newErrors.name || newErrors.email) {
+    if (newErrors.name || newErrors.email || newErrors.password) {
       return;
     }
     
@@ -230,34 +178,25 @@ const UserUpdatePage: React.FC = () => {
       return;
     }
 
-
-    // Convert role number to string for request
-    const roleString = formData.role === 1 ? "ADMIN" : "USER";
-    
-    const updateRequest: UpdateUserRequest = {
+    const createRequest: CreateUserRequest = {
       name: formData.name,
       email: formData.email,
-      role: roleString,
-      password: null // Password must be null as specified
+      password: formData.password,
+      role: formData.role
     };
     
-    if (id) {
-      userService.updateUser(updateRequest, id, token)
-        .then(() => {
-          toast.success("User updated successfully");
-          navigate("/admin/dashboard");
-        })
-        .catch((error: ErrorResponse) => {
-          toast.error(error.message || "Failed to update user");
-          setSaving(false);
-        });
-    } else {
-      toast.error("No user ID provided");
-      setSaving(false);
-    }
+    userService.createUserByAdmin(token, createRequest)
+      .then(() => {
+        toast.success("User created successfully");
+        navigate("/admin/dashboard");
+      })
+      .catch((error: ErrorResponse) => {
+        toast.error(error.message || "Failed to create user");
+        setSaving(false);
+      });
   };
 
-  if (loading || !imageLoaded) {
+  if (loading) {
     return (
       <div className={`min-h-screen flex items-center justify-center transition-colors duration-500 ${
         darkMode 
@@ -275,12 +214,11 @@ const UserUpdatePage: React.FC = () => {
         ? 'bg-slate-950 text-white' 
         : 'bg-slate-50 text-slate-800'
     }`}>
-      {/* Header */}
       <AdminHeader 
         user={currentAdmin} 
         darkMode={darkMode} 
         toggleTheme={toggleTheme} 
-        activeTab={activeTab} 
+        activeTab="users"
       />
 
       {/* Main content */}
@@ -302,40 +240,9 @@ const UserUpdatePage: React.FC = () => {
           
           <h1 className={`text-2xl font-bold mb-8 ${
             darkMode ? 'text-white' : 'text-slate-800'
-          }`}>Update User</h1>
+          }`}>Create New User</h1>
           
           <Card darkMode={darkMode}>
-            <div className="flex items-center space-x-4 mb-6">
-              <div className={`w-16 h-16 rounded-full overflow-hidden flex items-center justify-center ${
-                darkMode ? 'bg-indigo-600' : 'bg-indigo-500'
-              } text-white text-2xl font-bold`}>
-                {userImageUrl ? (
-                  <img 
-                    src={userImageUrl}
-                    alt={formData.name.charAt(0).toUpperCase()}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  formData.name.charAt(0).toUpperCase()
-                )}
-              </div>
-              <div>
-                <h2 className={`text-xl font-semibold ${
-                  darkMode ? 'text-white' : 'text-slate-800'
-                }`}>{formData.name}</h2>
-                <p className={`text-sm ${
-                  darkMode ? 'text-slate-400' : 'text-slate-600'
-                }`}>{formData.email}</p>
-                <span className={`inline-block mt-1 px-2 py-0.5 rounded-full text-xs font-medium ${
-                  formData.role === 1
-                    ? darkMode ? 'bg-purple-900/30 text-purple-400' : 'bg-purple-100 text-purple-800'
-                    : darkMode ? 'bg-blue-900/30 text-blue-400' : 'bg-blue-100 text-blue-800'
-                }`}>
-                  {formData.role === 1 ? 'ADMIN' : 'USER'}
-                </span>
-              </div>
-            </div>
-            
             <form onSubmit={handleSubmit}>
               <div className="space-y-5">
                 {/* Name field */}
@@ -360,7 +267,7 @@ const UserUpdatePage: React.FC = () => {
                       required
                     />
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <UserIcon className={`h-5 w-5 ${
+                      <User className={`h-5 w-5 ${
                         errors.name
                           ? 'text-red-500' 
                           : darkMode ? 'text-slate-500' : 'text-slate-400'
@@ -418,6 +325,54 @@ const UserUpdatePage: React.FC = () => {
                   )}
                 </div>
                 
+                {/* Password field */}
+                <div>
+                  <label className={`block text-sm font-medium mb-1.5 ${
+                    darkMode ? 'text-slate-300' : 'text-slate-700'
+                  }`}>
+                    Password <span className="text-red-500">*</span>
+                  </label>
+                  <div className="relative">
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      name="password"
+                      value={formData.password}
+                      onChange={handleInputChange}
+                      className={`w-full pl-10 pr-12 py-2.5 rounded-lg border transition-colors duration-500 ${
+                        darkMode 
+                          ? 'bg-slate-800 border-slate-700 text-white placeholder:text-slate-500 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500' 
+                          : 'bg-white border-slate-300 text-slate-800 placeholder:text-slate-400 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500'
+                      } ${errors.password ? 'border-red-500 focus:ring-red-500' : ''}`}
+                      placeholder="Minimum 8 characters"
+                      required
+                    />
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <Lock className={`h-5 w-5 ${
+                        errors.password
+                          ? 'text-red-500' 
+                          : darkMode ? 'text-slate-500' : 'text-slate-400'
+                      }`} />
+                    </div>
+                    
+                    <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
+                      <button 
+                        type="button" 
+                        onClick={() => setShowPassword(!showPassword)}
+                        className={`${darkMode ? 'text-slate-400 hover:text-slate-300' : 'text-slate-500 hover:text-slate-700'}`}
+                      >
+                        {showPassword ? (
+                          <EyeOff className="h-5 w-5" />
+                        ) : (
+                          <Eye className="h-5 w-5" />
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                  {errors.password && (
+                    <p className="mt-1 text-sm text-red-500">Password must be at least 8 characters</p>
+                  )}
+                </div>
+                
                 {/* Role field */}
                 <div>
                   <label className={`block text-sm font-medium mb-1.5 ${
@@ -437,8 +392,8 @@ const UserUpdatePage: React.FC = () => {
                       }`}
                       required
                     >
-                      <option value={0}>USER (Regular User)</option>
-                      <option value={1}>ADMIN (Administrator)</option>
+                      <option value="USER">USER (Regular User)</option>
+                      <option value="ADMIN">ADMIN (Administrator)</option>
                     </select>
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                       <Shield className={`h-5 w-5 ${
@@ -478,12 +433,12 @@ const UserUpdatePage: React.FC = () => {
                     {saving ? (
                       <>
                         <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                        Saving...
+                        Creating...
                       </>
                     ) : (
                       <>
                         <Save className="w-4 h-4 mr-2" />
-                        Save Changes
+                        Create User
                       </>
                     )}
                   </Button>
@@ -505,4 +460,4 @@ const UserUpdatePage: React.FC = () => {
   );
 };
 
-export default UserUpdatePage;
+export default CreateUserPage;

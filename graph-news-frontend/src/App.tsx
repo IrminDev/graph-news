@@ -53,7 +53,7 @@ const Hero: React.FC<{user: User | null, darkMode: boolean}> = ({ user, darkMode
           transition={{ duration: 0.7, delay: 0.6 }}
         >
           {user ? (
-            <Link to="/upload">
+            <Link to="/user/upload">
               <Button className="bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 text-white px-8 py-3 rounded-lg flex items-center shadow-lg shadow-indigo-600/20 dark:shadow-indigo-500/30">
                 <Zap className="w-5 h-5 mr-2" />
                 Upload News
@@ -248,7 +248,7 @@ const Navbar: React.FC<{user: User | null, darkMode: boolean, toggleTheme: () =>
       {user ? (
         <div className="flex items-center space-x-4">
           <span className="hidden md:inline-block text-slate-800 dark:text-white">Hello, {user.name}</span>
-          <Link to="/dashboard">
+          <Link to="/user/profile">
             <Button className="bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-600 dark:hover:bg-indigo-700 text-white px-5 py-2">Dashboard</Button>
           </Link>
         </div>
