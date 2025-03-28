@@ -26,7 +26,7 @@ import com.github.irmindev.graph_news.model.entity.User;
 import com.github.irmindev.graph_news.model.exception.EntityNotFoundException;
 import com.github.irmindev.graph_news.model.exception.ResourceNotFoundException;
 import com.github.irmindev.graph_news.model.exception.news.FileIssueException;
-import com.github.irmindev.graph_news.model.mapper.UserMapper;
+import com.github.irmindev.graph_news.model.mapper.NewsMapper;
 import com.github.irmindev.graph_news.repository.NewsRepository;
 import com.github.irmindev.graph_news.repository.UserRepository;
 import com.github.irmindev.graph_news.utils.HTMLSanitizer;
@@ -138,6 +138,6 @@ public class NewsService {
         }
         News newDocument = new News(title, content, author.get());
         News savedDocument = newsRepository.save(newDocument);
-        return new NewsDTO(savedDocument.getId(), savedDocument.getTitle(), savedDocument.getContent(), UserMapper.toDto(author.get()));
+        return NewsMapper.toDto(savedDocument);
     }
 }

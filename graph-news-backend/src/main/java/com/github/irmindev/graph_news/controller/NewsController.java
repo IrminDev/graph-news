@@ -95,7 +95,11 @@ public class NewsController {
         }
 
         return ResponseEntity.ok(new NewsUpload.Success(
-            newsService.createNews(createNewsWithContent.getTitle(), createNewsWithContent.getContent(), id)
+            newsService.createNews(
+                createNewsWithContent.getTitle(), 
+                createNewsWithContent.getContent(), 
+                id
+            )
         ));
     }
 }

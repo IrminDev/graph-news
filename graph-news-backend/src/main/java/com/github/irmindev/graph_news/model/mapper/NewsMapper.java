@@ -7,7 +7,13 @@ import com.github.irmindev.graph_news.model.entity.News;
 
 public class NewsMapper {
     public static NewsDTO toDto(News news) {
-        return new NewsDTO(news.getId(), news.getTitle(), news.getContent(), UserMapper.toDto(news.getAuthor()));
+        return new NewsDTO(
+            news.getId(), 
+            news.getTitle(), 
+            news.getContent(), 
+            UserMapper.toDto(news.getAuthor()), 
+            news.getCreatedAt()
+        );
     }
 
     public static List<NewsDTO> toDto(List<News> news) {
