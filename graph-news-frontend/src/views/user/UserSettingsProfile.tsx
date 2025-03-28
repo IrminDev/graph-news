@@ -300,6 +300,24 @@ const UserSettingsPage: React.FC = () => {
     );
   }
 
+  const handleDeleteAccount = () => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      toast.error("You need to login first");
+      navigate("/sign-in");
+      return;
+    }
+
+    userService.deleteMe(token).then(() => {
+      toast.success("Account deleted successfully");
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+      navigate("/sign-in");
+    }).catch((error: ErrorResponse) => {
+      toast.error(error.message || "Failed to delete account");
+    })
+  }
+
   return (
     <div className={`min-h-screen transition-colors duration-500 ${
       darkMode 
@@ -815,9 +833,7 @@ const UserSettingsPage: React.FC = () => {
                           ? 'bg-red-900/20 text-red-400 hover:bg-red-900/30' 
                           : 'bg-red-50 text-red-600 hover:bg-red-100'
                       }`}
-                      onClick={() => {
-                        toast.info("This would deactivate your account in a real application.");
-                      }}
+                      onClick={handleDeleteAccount}
                     >
                       Deactivate Account
                     </button>

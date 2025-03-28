@@ -1,6 +1,7 @@
 package com.github.irmindev.graph_news.model.entity;
 
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 
 import org.springframework.security.core.GrantedAuthority;
@@ -51,6 +52,9 @@ public class User implements UserDetails {
     @Basic(fetch = FetchType.LAZY)
     private byte[] image;
 
+    @Column(name = "created_at", nullable = false)
+    private Date createdAt = new Date(System.currentTimeMillis());
+
     public User() {
     }
 
@@ -59,6 +63,10 @@ public class User implements UserDetails {
         this.email = email;
         this.password = password;
         this.role = user;
+    }
+
+    public Date getCreatedAt() {
+        return createdAt;
     }
 
     public Long getId() {

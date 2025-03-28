@@ -176,4 +176,15 @@ public class UserController {
 
         return ResponseEntity.ok(new SignUpResponse.Success(user, token));
     }
+
+    @DeleteMapping("/delete/me")
+    public ResponseEntity<UpdateResponse> deleteMe(@RequestHeader("Authorization") String token) throws EntityNotFoundException {
+        Long id = jwtUtil.extractClaim(
+            token.replace("Bearer ", ""),
+            claims -> claims.get("id", Long.class)
+        );
+
+        UserDTO user = userService.deleteUser(id);
+        return ResponseEntity.ok(new UpdateResponse.Success(user));
+    }
 }

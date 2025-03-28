@@ -70,11 +70,11 @@ public class UserService {
             throw new EntityNotFoundException();
         }
 
-        if (user.getEmail().equals(request.getEmail()) && user.getId() != id) {
-            throw new AlreadyUsedEmailException();
-        }
-
         if (request.getEmail() != null) {
+            User existingUser = userRepository.findByEmail(request.getEmail()).orElse(null);
+            if (existingUser != null && !existingUser.getId().equals(id)) {
+                throw new AlreadyUsedEmailException();
+            }
             user.setEmail(request.getEmail());
         }
 
@@ -105,13 +105,17 @@ public class UserService {
         return UserMapper.toDto(user);
     }
 
-    public UserDTO updateMe(UpdateMe request, Long id, MultipartFile image) throws EntityNotFoundException, IOException {
+    public UserDTO updateMe(UpdateMe request, Long id, MultipartFile image) throws EntityNotFoundException, IOException, AlreadyUsedEmailException {
         User user = userRepository.findById(id).orElseThrow(() -> new EntityNotFoundException());
         if(!user.getIsActive()){
             throw new EntityNotFoundException();
         }
 
         if (request.getEmail() != null) {
+            User existingUser = userRepository.findByEmail(request.getEmail()).orElse(null);
+            if (existingUser != null && !existingUser.getId().equals(id)) {
+                throw new AlreadyUsedEmailException();
+            }
             user.setEmail(request.getEmail());
         }
 
@@ -119,7 +123,7 @@ public class UserService {
             user.setName(request.getName());
         }
 
-        if (image != null) {
+        if (image != null && !image.isEmpty()) {
             user.setImage(image.getBytes());
         }
 
