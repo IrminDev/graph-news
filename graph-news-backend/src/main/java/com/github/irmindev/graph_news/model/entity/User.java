@@ -1,6 +1,7 @@
 package com.github.irmindev.graph_news.model.entity;
 
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 
 import org.springframework.security.core.GrantedAuthority;
@@ -9,13 +10,16 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import com.github.irmindev.graph_news.model.enums.Role;
 
+import jakarta.persistence.Basic;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
 @Entity
@@ -41,14 +45,28 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private Boolean isActive = true;
 
+    @OneToMany(mappedBy = "author", fetch = FetchType.LAZY)
+    private List<News> news;
+
+    @Column(columnDefinition = "BYTEA")
+    @Basic(fetch = FetchType.LAZY)
+    private byte[] image;
+
+    @Column(name = "created_at", nullable = false)
+    private Date createdAt = new Date(System.currentTimeMillis());
+
     public User() {
     }
 
-    public User(String name, String email, String password, Role role) {
+    public User(String name, String email, String password, Role user) {
         this.name = name;
         this.email = email;
         this.password = password;
-        this.role = role;
+        this.role = user;
+    }
+
+    public Date getCreatedAt() {
+        return createdAt;
     }
 
     public Long getId() {
@@ -93,6 +111,22 @@ public class User implements UserDetails {
 
     public void setIsActive(Boolean isActive) {
         this.isActive = isActive;
+    }
+
+    public List<News> getNews() {
+        return news;
+    }
+
+    public void setNews(List<News> news) {
+        this.news = news;
+    }
+
+    public byte[] getImage() {
+        return image;
+    }
+
+    public void setImage(byte[] image) {
+        this.image = image;
     }
 
     @Override
