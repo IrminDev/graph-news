@@ -31,12 +31,14 @@ import com.github.irmindev.graph_news.model.entity.News;
 import com.github.irmindev.graph_news.model.entity.User;
 import com.github.irmindev.graph_news.model.exception.EntityNotFoundException;
 import com.github.irmindev.graph_news.model.exception.ResourceNotFoundException;
+import com.github.irmindev.graph_news.model.exception.UnallowedMethodException;
 import com.github.irmindev.graph_news.model.exception.news.FileIssueException;
 import com.github.irmindev.graph_news.model.exception.news.HTMLInvalidFormatException;
 import com.github.irmindev.graph_news.model.mapper.NewsMapper;
 import com.github.irmindev.graph_news.repository.NewsRepository;
 import com.github.irmindev.graph_news.repository.UserRepository;
 import com.github.irmindev.graph_news.utils.HTMLSanitizer;
+import com.github.irmindev.graph_news.model.enums.Role;
 
 @Service
 public class NewsService {
@@ -167,6 +169,40 @@ public class NewsService {
         } catch (Exception e) {
             logger.error("Error saving news: {}", e.getMessage(), e);
             throw new RuntimeException("Failed to save news: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Elimina una noticia verificando que el solicitante sea el autor o un administrador
+     * @return La noticia que fue eliminada
+     */
+    public NewsDTO deleteNews(Long newsId, Long requesterId, String requesterRole) 
+            throws EntityNotFoundException, UnallowedMethodException {
+        if (newsId == null) {
+            throw new IllegalArgumentException("News ID cannot be null");
+        }
+        
+        // Validar que la noticia exista
+        News news = newsRepository.findById(newsId)
+                .orElseThrow(() -> new EntityNotFoundException());
+        
+        // Convertir a DTO antes de eliminar para retornarla
+        NewsDTO newsDTO = NewsMapper.toDto(news);
+        
+        // Validar que el solicitante sea el autor o un administrador
+        boolean isAuthor = news.getAuthor().getId().equals(requesterId);
+        boolean isAdmin = Role.ADMIN.name().equals(requesterRole);
+        
+        if (!isAuthor && !isAdmin) {
+            throw new UnallowedMethodException("Only the author or an administrator can delete this news");
+        }
+        
+        try {
+            newsRepository.delete(news);
+            return newsDTO;
+        } catch (Exception e) {
+            logger.error("Error deleting news with ID {}: {}", newsId, e.getMessage(), e);
+            throw new RuntimeException("Failed to delete news: " + e.getMessage());
         }
     }
 

@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.bind.annotation.DeleteMapping;
 
 import com.github.irmindev.graph_news.model.dto.NewsDTO;
 import com.github.irmindev.graph_news.model.request.news.CreateNews;
@@ -16,6 +17,7 @@ import com.github.irmindev.graph_news.model.response.news.NewsResponse;
 import com.github.irmindev.graph_news.service.NewsService;
 import com.github.irmindev.graph_news.utils.JwtUtil;
 import com.github.irmindev.graph_news.model.exception.EntityNotFoundException;
+import com.github.irmindev.graph_news.model.exception.UnallowedMethodException;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -251,5 +253,40 @@ public class NewsController {
         
         List<NewsDTO> news = newsService.getLatestNews(limit);
         return ResponseEntity.ok(new NewsResponse.SuccessList(news));
+    }
+    
+    /**
+     * Elimina una noticia por su ID, verificando que el usuario sea el autor o un administrador
+     */
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteNews(
+            @PathVariable Long id,
+            @RequestHeader("Authorization") String token) {
+        
+        // Extraer ID y rol del usuario desde el token
+        Long userId = jwtUtil.extractClaim(token.replace("Bearer ", ""), 
+            claims -> claims.get("id", Long.class));
+        
+        String userRole = jwtUtil.extractClaim(token.replace("Bearer ", ""), 
+            claims -> claims.get("role", String.class));
+        
+        if (userId == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(new NewsResponse.Failure("Invalid authentication"));
+        }
+        
+        try {
+            // Ahora recibimos la noticia eliminada
+            NewsDTO deletedNews = newsService.deleteNews(id, userId, userRole);
+            
+            // Usamos la información en la respuesta
+            return ResponseEntity.ok(new NewsResponse.Success(deletedNews));
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(new NewsResponse.Failure("News not found"));
+        } catch (UnallowedMethodException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(new NewsResponse.Failure(e.getMessage()));
+        }
     }
 }
