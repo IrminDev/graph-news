@@ -137,7 +137,8 @@ public class NewsController {
         
         return ResponseEntity.ok(
             new NewsResponse.SuccessList(
-                newsPage.getContent()
+                newsPage.getContent(),
+                newsPage.getTotalElements()
             )
         );
     }
@@ -185,7 +186,8 @@ public class NewsController {
             
             return ResponseEntity.ok(
                 new NewsResponse.SuccessList(
-                    newsPage.getContent()
+                    newsPage.getContent(),
+                    newsPage.getTotalElements()
                 )
             );
         } catch (EntityNotFoundException e) {
@@ -208,7 +210,8 @@ public class NewsController {
         
         return ResponseEntity.ok(
             new NewsResponse.SuccessList(
-                newsPage.getContent()
+                newsPage.getContent(),
+                newsPage.getTotalElements()
             )
         );
     }
@@ -229,7 +232,8 @@ public class NewsController {
             
             return ResponseEntity.ok(
                 new NewsResponse.SuccessList(
-                    newsPage.getContent()
+                    newsPage.getContent(),
+                    newsPage.getTotalElements()
                 )
             );
         } else {
