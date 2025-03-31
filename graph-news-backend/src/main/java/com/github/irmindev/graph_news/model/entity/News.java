@@ -1,6 +1,6 @@
 package com.github.irmindev.graph_news.model.entity;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -23,9 +23,9 @@ public class News {
 
     @ManyToOne
     private User author;
-
+    
     @Column(nullable = false)
-    private Date createdAt = new Date(System.currentTimeMillis());
+    private LocalDateTime createdAt;
 
     public News() {
     }
@@ -34,6 +34,7 @@ public class News {
         this.title = title;
         this.content = content;
         this.author = author;
+        this.createdAt = LocalDateTime.now();
     }
 
     public Long getId() {
@@ -62,5 +63,13 @@ public class News {
 
     public void setAuthor(User author) {
         this.author = author;
+    }
+    
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+    
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
     }
 }
