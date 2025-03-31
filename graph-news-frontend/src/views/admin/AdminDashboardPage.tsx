@@ -177,11 +177,11 @@ const AdminDashboardPage: React.FC = () => {
         
         userService.getAllUsers(token)
           .then((data: ListUserResponse) => {
-            setUsers(data.users);
-            setFilteredUsers(data.users);
+            setUsers(data.users.content);
+            setFilteredUsers(data.users.content);
             
             // Check for user images for all users
-            data.users.forEach(user => {
+            data.users.content.forEach(user => {
               if (user.id) {
                 fetchUserImage(user.id);
               }
@@ -248,11 +248,11 @@ const AdminDashboardPage: React.FC = () => {
     
     userService.getAllUsers(token)
       .then((data: ListUserResponse) => {
-        setUsers(data.users);
-        setFilteredUsers(data.users);
+        setUsers(data.users.content);
+        setFilteredUsers(data.users.content);
         
         // Check for user images for all users
-        data.users.forEach(user => {
+        data.users.content.forEach(user => {
           if (user.id) {
             fetchUserImage(user.id);
           }
