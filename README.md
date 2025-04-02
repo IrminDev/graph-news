@@ -63,6 +63,7 @@ In this project these are the highlitghted features:
 
 In the graph-news-backend folder you have a spring boot project, this project is a web API Rest for the graph news app. These are the endpoints.
 
+# User endpoints
 **URL**: `/api/user/{id}`
 **Method**: `GET`
 **Parameters**:
@@ -76,14 +77,14 @@ In the graph-news-backend folder you have a spring boot project, this project is
 > | http code     | content-type                      | response                                                            |
 > |---------------|-----------------------------------|---------------------------------------------------------------------|
 > | `400`         | `application/json`    | `{"message":"Invalid token"}` |      
-> | `403`         | `application/json`    | `{"message":"Token expired"`  |
 > | `401`         | `application/json`    | `{"message":"The id in the token does not match the requested id or is not an ADMIN user"}`                            |
-> | `200`         | `application/json`    | `{message: 'Success', user: {...}}`                      |
+> | `403`         | `application/json`    | `{"message":"You are not allowed to access this resource}"`  |
+> | `200`         | `application/json`    | `{message: 'Successfully retrieved user', user: {...}}`                      |
 
 **Example response**:
 ```js
 {
-  message: 'Success',
+  message: 'Successfully retrieved user',
   user: {
     id: 1,
     name: 'Frijolito Hernandez',
@@ -145,7 +146,7 @@ In the graph-news-backend folder you have a spring boot project, this project is
 
 > | http code     | content-type                      | response                                                            |
 > |---------------|-----------------------------------|---------------------------------------------------------------------|
-> | `400`         | `application/json`    | `{"message":"Incorrect credentials"}` |
+> | `400`         | `application/json`    | `{"message":"Invalid credentials"}` |
 > | `200`         | `application/json`    | `{message: 'Success', user: {...}, token: '...'}`                      |
 **Example request**:
 ```js
@@ -205,7 +206,6 @@ In the graph-news-backend folder you have a spring boot project, this project is
 }
 ```
 ---
-
 **URL**: `/api/user/{id}`
 **Method**: `DELETE`
 **Parameters**:
@@ -239,7 +239,7 @@ In the graph-news-backend folder you have a spring boot project, this project is
 **Parameters**:
 > | name      |  type     | data type               | description                                                           |
 > |-----------|-----------|-------------------------|-----------------------------------------------------------------------|
-> | name      |  required | String   | The name is the new name of the user yo want to update.  |
+> | name      |  required | String   | The name is the new name of the user you want to update.  |
 > | email      |  required | String   | The email is the new email that you want to update.  |
 > | id      |  required | String   | Is the ID needed to do the query, this ID must be on the URL.  |
 > | token      |  required | String   | The token is the JWT generated in each session, it must to be in the Authorization headers using Bearer.  |
@@ -275,8 +275,687 @@ In the graph-news-backend folder you have a spring boot project, this project is
   }
 }
 ```
-
 ---
+**URL**: `/api/user/me`
+**Method**: `GET`
+**Parameters**:
+> | name      |  type     | data type               | description                                                           |
+> |-----------|-----------|-------------------------|-----------------------------------------------------------------------|
+> | token      |  required | String   | The token is the JWT generated in each session, it must to be in the Authorization headers using Bearer.  |
+
+**Responses**:
+
+> | http code     | content-type                      | response                                                            |
+> |---------------|-----------------------------------|---------------------------------------------------------------------|
+> | `400`         | `application/json`    | `{"message":"Invalid token"}` |      
+> | `401`         | `application/json`    | `{"message":"The id in the token does not match the requested id or is not an ADMIN user"}`                            |
+> | `403`         | `application/json`    | `{"message":"Token expired"`  |
+> | `200`         | `application/json`    | `{message: 'Successfully retrieved user', user: {...}}`                      |
+
+**Example response**:
+```js
+{
+  message: 'Successfully retrieved user',
+  user: {
+    id: 1,
+    name: 'Frijolito Hernandez',
+    email: 'Frijolito@gmail.com',
+    role: 'USER'
+  },
+}
+```
+---
+**URL**: `/api/user/update/me`
+**Method**: `PUT`
+**Parameters**:
+> | name      |  type     | data type               | description                                                           |
+> |-----------|-----------|-------------------------|-----------------------------------------------------------------------|
+> | name      |  required | String   | The name is the new name of the user you want to update.  |
+> | email      |  required | String   | The email is the new email that you want to update.  |
+> | id      |  required | String   | Is the ID needed to do the query, this ID must be on the URL.  |
+> | token      |  required | String   | The token is the JWT generated in each session, it must to be in the Authorization headers using Bearer.  |
+> | image      |  required | MultipartFile   | The image is a upload file by a HTTP request, particularly a profile image.   |
+
+
+**Responses**:
+
+> | http code     | content-type                      | response                                                            |
+> |---------------|-----------------------------------|---------------------------------------------------------------------|
+> | `400`         | `application/json`    | `{"message":"Invalid token"}` |      
+> | `401`         | `application/json`    | `{"message":"The id in the token does not match the requested id or is not an ADMIN user"}`                            |
+> | `403`         | `application/json`    | `{"message":"Token expired"}`  |
+> | `409`         | `application/json`    | `{"message":"Email already used"}`  |
+> | `410`         | `application/json`    | `{"message":"Entity not found"}`  |
+> | `502`         | `application/json`    | `{"message":"Invalid response from another server"}`                                                            |
+> | `200`         | `application/json`    | `{message: 'Update successful', user: {...}}`                      |
+**Example request**:
+```js
+{
+  name: 'Frijolito Hernandez',
+  email: 'Frijolito@gmail.com',
+  image: 'profilephoto.png'
+}
+```
+
+**Example response**:
+```js
+{
+  message: 'Update successful',
+  user: {
+    id: 1,
+    name: 'Frijolito Hernandez',
+    email: 'Frijolito@gmail.com',
+    role: 'USER',
+    image: 'profilephoto.png'
+  }
+}
+```
+---
+**URL**: `/api/user/update/me/password`
+**Method**: `PUT`
+**Parameters**:
+> | name      |  type     | data type               | description                                                           |
+> |-----------|-----------|-------------------------|-----------------------------------------------------------------------|
+> | oldPassword      |  required | String   | The oldPassword is your actual password.  |
+> | newPassword      |  required | String   | The newPassword is the new password that you want to update.  |
+> | id      |  required | String   | Is the ID needed to do the query, this ID must be on the URL.  |
+> | token      |  required | String   | The token is the JWT generated in each session, it must to be in the Authorization headers using Bearer.  |
+
+
+**Responses**:
+
+> | http code     | content-type                      | response                                                            |
+> |---------------|-----------------------------------|---------------------------------------------------------------------|
+> | `400`         | `application/json`    | `{"message":"Invalid token"}` or `{"message":"Invalid credentials"}`|      
+> | `401`         | `application/json`    | `{"message":"The id in the token does not match the requested id or is not an ADMIN user"}`                            |
+> | `403`         | `application/json`    | `{"message":"Token expired"}`  |
+> | `410`         | `application/json`    | `{"message":"Entity not found"}`  |
+> | `200`         | `application/json`    | `{message: 'Update successful', user: {...}}`                      |
+**Example request**:
+```js
+{
+  oldPassword: '12345678',
+  newPassword: '87654321'
+}
+```
+
+**Example response**:
+```js
+{
+  message: 'Update successful',
+  user: {
+    id: 1,
+    name: 'Frijolito Hernandez',
+    email: 'Frijolito@gmail.com',
+    role: 'USER',
+  }
+}
+```
+---
+**URL**: `/api/user/debug`
+**Method**: `GET`
+**Parameters**:
+> | name      |  type     | data type               | description                                                           |
+> |-----------|-----------|-------------------------|-----------------------------------------------------------------------|
+> | token      |  required | String   | The token is the JWT generated in each session, it must to be in the Authorization headers using Bearer.  |
+
+**Responses**:
+
+> | http code     | content-type                      | response                                                            |
+> |---------------|-----------------------------------|---------------------------------------------------------------------|
+> | `400`         | `application/json`    | `{"message":"Invalid token"}` |      
+> | `401`         | `application/json`    | `{"message":"The id in the token does not match the requested id or is not an ADMIN user"}`                            |
+> | `403`         | `application/json`    | `{"message":"Token expired"`  |
+> | `200`         | `application/json`    | `{message: 'Current user', user: {...}, authorities: {...}}`                      |
+
+**Example response**:
+```js
+{
+  message: 'Current user',
+  user: {
+    id: 1,
+    name: 'Frijolito Hernandez',
+    email: 'Frijolito@gmail.com',
+    role: 'USER'
+  },
+  authorities:{
+    authLevel1: 'Access to modify users'
+  },
+}
+```
+---
+**URL**: `/api/user/image/{id}`
+**Method**: `GET`
+**Parameters**:
+> | name      |  type     | data type               | description                                                           |
+> |-----------|-----------|-------------------------|-----------------------------------------------------------------------|
+> | id      |  required | String   | Is the ID needed to do the query, this ID must be on the URL.  |
+> | token      |  required | String   | The token is the JWT generated in each session, it must to be in the Authorization headers using Bearer.  |
+
+**Responses**:
+
+> | http code     | content-type                      | response                                                            |
+> |---------------|-----------------------------------|---------------------------------------------------------------------|
+> | `400`         | `application/json`    | `{"message":"Invalid token"}` |      
+> | `401`         | `application/json`    | `{"message":"The id in the token does not match the requested id or is not an ADMIN user"}`                            |
+> | `403`         | `application/json`    | `{"message":"Token expired"`  |
+> | `410`         | `application/json`    | `{"message":"Entity not found"}`  |
+> | `200`         | `application/json`    | `{"message: 'Image', image: {image/jpeg}}`                      |
+
+**Example response**:
+```js
+{
+  message: 'Image',
+  image: 'image/jpeg',
+}
+```
+---
+**URL**: `/api/user/create/user`
+**Method**: `POST`
+**Parameters**:
+> | name      |  type     | data type               | description                                                           |
+> |-----------|-----------|-------------------------|-----------------------------------------------------------------------|
+> | email      |  required | String   | The email is part of the credentials needed to login.  |
+> | password      |  required | String   | The password is the key you want to use for your account.  |
+> | name      |  required | String   | The name is the name of the user you want to create.   |
+> | role      |  required | String   | The role refers to the type of user in the system.    |
+> | token      |  required | String   | The token is the JWT generated in each session, it must to be in the Authorization headers using Bearer.  |
+
+**Responses**:
+
+> | http code     | content-type                      | response                                                            |
+> |---------------|-----------------------------------|---------------------------------------------------------------------|
+> | `400`         | `application/json`    | `{"message":"Email already used"}` |
+> | `401`         | `application/json`    | `{"message":"The id in the token does not match the requested id or is not an ADMIN user"}`                            |
+> | `403`         | `application/json`    | `{"message":"Token expired"`  |
+> | `200`         | `application/json`    | `{"message": 'User created successfully', user: {...}, token: '...'}`                      |
+**Example request**:
+```js
+{
+  email: 'Frijolito@gmail.com',
+  password: '12345678',
+  name: 'Frijolito Hernandez',
+  role: 'USER'
+}
+```
+
+**Example response**:
+```js
+{
+  message: 'User created successfully',
+  user: {
+    id: 1,
+    name: 'Frijolito Hernandez',
+    email: 'Frijolito@gmail.com',
+    role: 'USER'
+  },
+  token: '...'
+}
+```
+---
+**URL**: `/api/user/delete/me`
+**Method**: `DELETE`
+**Parameters**:
+> | name      |  type     | data type               | description                                                           |
+> |-----------|-----------|-------------------------|-----------------------------------------------------------------------|
+> | id      |  required | String   | Is the ID needed to do the query, this ID must be on the URL.  |
+> | token      |  required | String   | The token is the JWT generated in each session, it must to be in the Authorization headers using Bearer.  |
+
+**Responses**:
+
+> | http code     | content-type                      | response                                                            |
+> |---------------|-----------------------------------|---------------------------------------------------------------------|
+> | `403`         | `application/json`    | |
+> | `410`         | `application/json`    | `{"message":"Entity not found"`  |
+> | `200`         | `application/json`    | `{message: 'Update successful', user: {...}}`                      |
+
+**Example response**:
+```js
+{
+  message: 'Update successful',
+  user: {
+    name: 'Frijolito Hernandez',
+    email: 'frijol@gmail.com',
+    role: 'USER'
+  }
+}
+```
+
+# News endpoints
+**URL**: `/api/news/upload/url`
+**Method**: `POST`
+**Parameters**:
+> | name      |  type     | data type               | description                                                           |
+> |-----------|-----------|-------------------------|-----------------------------------------------------------------------|
+> | title      |  required | String   | The title is like a identifier of the news.  |
+> | url     |  required | String   | The url is the address from we can get the news.  |
+> | token      |  required | String   | The token is the JWT generated in each session, it must to be in the Authorization headers using Bearer.  |
+
+**Responses**:
+
+> | http code     | content-type                      | response                                                            |
+> |---------------|-----------------------------------|---------------------------------------------------------------------|
+> | `400`         | `application/json`    | `{"message":"Failed to upload news"}` |
+> | `401`         | `application/json`    | `{"message":"The id in the token does not match the requested id or is not an ADMIN user"}`                            |
+> | `403`         | `application/json`    | `{"message":"Token expired"}`  |
+> | `200`         | `application/json`    | `{"message": 'News uploaded successfully', news: {...}}`                      |
+**Example request**:
+```js
+{
+  title: 'Dollar went down this Monday 31, March 2025.',
+  url: 'https://www.ibm.com/news/financial/today',
+}
+```
+
+**Example response**:
+```js
+{
+  message: 'News created successfully',
+  news: {
+    id: 1,
+    title: 'Dollar went down this Monday 31, March 2025.',
+    content: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
+    author: 'Frijolito Hernandez',
+    createdAt: '01/02/1969'
+  },
+}
+```
+---
+**URL**: `/api/news/upload/file`
+**Method**: `POST`
+**Parameters**:
+> | name      |  type     | data type               | description                                                           |
+> |-----------|-----------|-------------------------|-----------------------------------------------------------------------|
+> | title      |  required | String   | The title is like a identifier of the news.  |
+> | file     |  required | String   | The file is the object that contains the news info.  |
+> | token      |  required | String   | The token is the JWT generated in each session, it must to be in the Authorization headers using Bearer.  |
+
+**Responses**:
+
+> | http code     | content-type                      | response                                                            |
+> |---------------|-----------------------------------|---------------------------------------------------------------------|
+> | `400`         | `application/json`    | `{"message":"Failed to upload news"}` |
+> | `401`         | `application/json`    | `{"message":"The id in the token does not match the requested id or is not an ADMIN user"}`                            |
+> | `403`         | `application/json`    | `{"message":"Token expired"}`  |
+> | `200`         | `application/json`    | `{"message": 'News uploaded successfully', news: {...}}`                      |
+**Example request**:
+```js
+{
+  title: 'Dollar went down this Monday 31, March 2025.',
+  file: 'news01011969.pdf',
+}
+```
+
+**Example response**:
+```js
+{
+  message: 'News created successfully',
+  news: {
+    id: 1,
+    title: 'Dollar went down this Monday 31, March 2025.',
+    content: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
+    author: 'Frijolito Hernandez',
+    createdAt: '01/02/1969'
+  },
+}
+```
+---
+**URL**: `/api/news/upload/content`
+**Method**: `POST`
+**Parameters**:
+> | name      |  type     | data type               | description                                                           |
+> |-----------|-----------|-------------------------|-----------------------------------------------------------------------|
+> | title      |  required | String   | The title is like a identifier of the news.  |
+> | content     |  required | String   | The content is the text that corresponds to news info.  |
+> | token      |  required | String   | The token is the JWT generated in each session, it must to be in the Authorization headers using Bearer.  |
+
+**Responses**:
+
+> | http code     | content-type                      | response                                                            |
+> |---------------|-----------------------------------|---------------------------------------------------------------------|
+> | `400`         | `application/json`    | `{"message":"Failed to upload news"}` |
+> | `401`         | `application/json`    | `{"message":"The id in the token does not match the requested id or is not an ADMIN user"}`                            |
+> | `403`         | `application/json`    | `{"message":"Token expired"}`  |
+> | `200`         | `application/json`    | `{"message": 'News uploaded successfully', news: {...}}`                      |
+**Example request**:
+```js
+{
+  title: 'Dollar went down this Monday 31, March 2025.',
+  content: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'
+}
+```
+
+**Example response**:
+```js
+{
+  message: 'News created successfully',
+  news: {
+    id: 1,
+    title: 'Dollar went down this Monday 31, March 2025.',
+    content: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
+    author: 'Frijolito Hernandez',
+    createdAt: '01/02/1969'
+  },
+}
+```
+---
+**URL**: `/api/news`
+**Method**: `GET`
+**Parameters**:
+> | name      |  type     | data type               | description                                                           |
+> |-----------|-----------|-------------------------|-----------------------------------------------------------------------|
+> | page      |  required | int   | Is the number of the page where the system initialize this endpoint.  |
+> | size      |  required | int   | Is the size of the referred page in the past description.  |
+> | sortBy      |  required | String   | Is the indication to order page's info by a certain way.  |
+> | direction      |  required | String   | Is the way by the page orders its info.  |
+> | token      |  required | String   | The token is the JWT generated in each session, it must to be in the Authorization headers using Bearer.  |
+
+**Responses**:
+
+> | http code     | content-type                      | response                                                            |
+> |---------------|-----------------------------------|---------------------------------------------------------------------|
+> | `400`         | `application/json`    | `{"message":"Operation failed"}` |
+> | `401`         | `application/json`    | `{"message":"The id in the token does not match the requested id or is not an ADMIN user"}`                            |
+> | `403`         | `application/json`    | `{"message":"Token expired"}`  |
+> | `200`         | `application/json`    | `{"message": 'Operation completed successfully', newsList: [...], total: {...}}`                      |
+**Example response**:
+```js
+{
+  message: 'Operation completed successfully',
+  newsList: [
+    {
+      id: 2,
+      title: 'A pair of thiefs rubbered the National Bank.',
+      content: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
+      author: 'Pakis Jimenez',
+      createdAt: '01/01/1969'
+    }
+    {
+      id: 1,
+      title: 'Dollar went down this Monday 31, March 2025.',
+      content: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
+      author: 'Frijolito Hernandez',
+      createdAt: '01/02/1969'
+    },
+    
+  ],
+  total: '2'
+}
+```
+---
+**URL**: `/api/news/{id}`
+**Method**: `GET`
+**Parameters**:
+> | name      |  type     | data type               | description                                                           |
+> |-----------|-----------|-------------------------|-----------------------------------------------------------------------|
+> | id      |  required | String   | Is the ID needed to do the query, this ID must be on the URL.  |
+> | token      |  required | String   | The token is the JWT generated in each session, it must to be in the Authorization headers using Bearer.  |
+
+**Responses**:
+
+> | http code     | content-type                      | response                                                            |
+> |---------------|-----------------------------------|---------------------------------------------------------------------|
+> | `400`         | `application/json`    | `{"message":"Operation failed"}` |
+> | `401`         | `application/json`    | `{"message":"The id in the token does not match the requested id or is not an ADMIN user"}`                            |
+> | `403`         | `application/json`    | `{"message":"Token expired"}`  |
+> | `410`         | `application/json`    | `{"message":"News not found"`  |
+> | `200`         | `application/json`    | `{"message": 'Operation completed successfully', news: {...}}`                      |
+**Example response**:
+```js
+{
+  message: 'Operation completed successfully',
+  news: {
+    id: 1,
+    title: 'Dollar went down this Monday 31, March 2025.',
+    content: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
+    author: 'Frijolito Hernandez',
+    createdAt: '01/02/1969'
+  },
+}
+```
+---
+**URL**: `/api/news/user/{userId}`
+**Method**: `GET`
+**Parameters**:
+> | name      |  type     | data type               | description                                                           |
+> |-----------|-----------|-------------------------|-----------------------------------------------------------------------|
+> | userId      |  required | String   | Is the ID needed to do the query, this ID corresponds to the user that makes the query.  |
+> | token      |  required | String   | The token is the JWT generated in each session, it must to be in the Authorization headers using Bearer.  |
+
+**Responses**:
+
+> | http code     | content-type                      | response                                                            |
+> |---------------|-----------------------------------|---------------------------------------------------------------------|
+> | `400`         | `application/json`    | `{"message":"Operation failed"}` |
+> | `401`         | `application/json`    | `{"message":"The id in the token does not match the requested id or is not an ADMIN user"}`                            |
+> | `403`         | `application/json`    | `{"message":"Token expired"}`  |
+> | `410`         | `application/json`    | `{"message":"User not found"`  |
+> | `200`         | `application/json`    | `{"message": 'Operation completed successfully', newsList: [...], total: {...}}`                      |
+**Example response**:
+```js
+{
+  message: 'Operation completed successfully',
+  newsList: [
+    {
+      id: 1,
+      title: 'Dollar went down this Monday 31, March 2025.',
+      content: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
+      author: 'Frijolito Hernandez',
+      createdAt: '01/02/1969'
+    },
+    {
+      id: 2,
+      title: 'A pair of thiefs rubbered the National Bank.',
+      content: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
+      author: 'Pakis Jimenez',
+      createdAt: '01/01/1969'
+    }
+  ],
+  total: '2'
+}
+```
+---
+**URL**: `/api/news/user/{userId}/paged`
+**Method**: `GET`
+**Parameters**:
+> | name      |  type     | data type               | description                                                           |
+> |-----------|-----------|-------------------------|-----------------------------------------------------------------------|
+> | userId      |  required | String   | Is the ID needed to do the query, this ID corresponds to the user that makes the query.  |
+> | page      |  required | int   | Is the number of the page where the system initialize this endpoint.  |
+> | size      |  required | int   | Is the size of the referred page in the past description.  |
+> | token      |  required | String   | The token is the JWT generated in each session, it must to be in the Authorization headers using Bearer.  |
+
+**Responses**:
+
+> | http code     | content-type                      | response                                                            |
+> |---------------|-----------------------------------|---------------------------------------------------------------------|
+> | `400`         | `application/json`    | `{"message":"Operation failed"}` |
+> | `401`         | `application/json`    | `{"message":"The id in the token does not match the requested id or is not an ADMIN user"}`                            |
+> | `403`         | `application/json`    | `{"message":"Token expired"}`  |
+> | `410`         | `application/json`    | `{"message":"User not found"`  |
+> | `200`         | `application/json`    | `{"message": 'Operation completed successfully', newsList: [...], total: {...}}`                      |
+**Example response**:
+```js
+{
+  message: 'Operation completed successfully',
+  newsList: [
+    {
+      id: 1,
+      title: 'Dollar went down this Monday 31, March 2025.',
+      content: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
+      author: 'Frijolito Hernandez',
+      createdAt: '01/02/1969'
+    },
+    {
+      id: 2,
+      title: 'A pair of thiefs rubbered the National Bank.',
+      content: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
+      author: 'Pakis Jimenez',
+      createdAt: '01/01/1969'
+    }
+  ],
+  total: '2'
+}
+```
+---
+**URL**: `/api/news/search`
+**Method**: `GET`
+**Parameters**:
+> | name      |  type     | data type               | description                                                           |
+> |-----------|-----------|-------------------------|-----------------------------------------------------------------------|
+> | query     |  required | String   | Is the instruction that receives the system's model to return data that user wants to get. |
+> | page      |  required | int   | Is the number of the page where the system initialize this endpoint.  |
+> | size      |  required | int   | Is the size of the referred page in the past description.  |
+> | token      |  required | String   | The token is the JWT generated in each session, it must to be in the Authorization headers using Bearer.  |
+
+**Responses**:
+
+> | http code     | content-type                      | response                                                            |
+> |---------------|-----------------------------------|---------------------------------------------------------------------|
+> | `400`         | `application/json`    | `{"message":"Operation failed"}` |
+> | `401`         | `application/json`    | `{"message":"The id in the token does not match the requested id or is not an ADMIN user"}`                            |
+> | `403`         | `application/json`    | `{"message":"Token expired"}`  |
+> | `410`         | `application/json`    | `{"message":"News not found"`  |
+> | `200`         | `application/json`    | `{"message": 'Operation completed successfully',  newsList: [...], total: {...}}`                      |
+**Example response**:
+```js
+{
+  message: 'Operation completed successfully',
+  newsList: [
+    {
+      id: 1,
+      title: 'Dollar went down this Monday 31, March 2025.',
+      content: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
+      author: 'Frijolito Hernandez',
+      createdAt: '01/02/1969'
+    },
+    {
+      id: 2,
+      title: 'A pair of thiefs rubbered the National Bank.',
+      content: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
+      author: 'Pakis Jimenez',
+      createdAt: '01/01/1969'
+    }
+  ],
+  total: '2'
+}
+```
+---
+**URL**: `/api/news/date-range`
+**Method**: `GET`
+**Parameters**:
+> | name      |  type     | data type               | description                                                           |
+> |-----------|-----------|-------------------------|-----------------------------------------------------------------------|
+> | startDate     |  required | String   | Is the date where starts the range used by the system to get the specific news. |
+> | endDate     |  required | String   | Is the date where finishes the range used by the system to get the specific news. |
+> | page      |  required | int   | Is the number of the page where the system initialize this endpoint.  |
+> | size      |  required | int   | Is the size of the referred page in the past description.  |
+> | token      |  required | String   | The token is the JWT generated in each session, it must to be in the Authorization headers using Bearer.  |
+
+**Responses**:
+
+> | http code     | content-type                      | response                                                            |
+> |---------------|-----------------------------------|---------------------------------------------------------------------|
+> | `400`         | `application/json`    | `{"message":"Operation failed"}` |
+> | `401`         | `application/json`    | `{"message":"The id in the token does not match the requested id or is not an ADMIN user"}`                            |
+> | `403`         | `application/json`    | `{"message":"Token expired"}`  |
+> | `410`         | `application/json`    | `{"message":"News not found"`  |
+> | `200`         | `application/json`    | `{"message": 'Operation completed successfully',  newsList: [...], total: {...}}`                      |
+**Example response**:
+```js
+{
+  message: 'Operation completed successfully',
+  newsList: [
+    {
+      id: 1,
+      title: 'Dollar went down this Monday 31, March 2025.',
+      content: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
+      author: 'Frijolito Hernandez',
+      createdAt: '01/02/1969'
+    },
+    {
+      id: 2,
+      title: 'A pair of thiefs rubbered the National Bank.',
+      content: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
+      author: 'Pakis Jimenez',
+      createdAt: '01/01/1969'
+    }
+  ],
+  total: '2'
+}
+```
+---
+**URL**: `/api/news/latest`
+**Method**: `GET`
+**Parameters**:
+> | name      |  type     | data type               | description                                                           |
+> |-----------|-----------|-------------------------|-----------------------------------------------------------------------|
+> | limit      |  required | int   | Is the number of the days where the user stablished like a limit to make system searches all of the news that exists between today and that number of the days in the past.  |
+> | token      |  required | String   | The token is the JWT generated in each session, it must to be in the Authorization headers using Bearer.  |
+
+**Responses**:
+
+> | http code     | content-type                      | response                                                            |
+> |---------------|-----------------------------------|---------------------------------------------------------------------|
+> | `400`         | `application/json`    | `{"message":"Operation failed"}` |
+> | `401`         | `application/json`    | `{"message":"The id in the token does not match the requested id or is not an ADMIN user"}`                            |
+> | `403`         | `application/json`    | `{"message":"Token expired"}`  |
+> | `410`         | `application/json`    | `{"message":"News not found"`  |
+> | `200`         | `application/json`    | `{"message": 'Operation completed successfully',  newsList: [...], total: {...}}`                      |
+**Example response**:
+```js
+{
+  message: 'Operation completed successfully',
+  newsList: [
+    {
+      id: 1,
+      title: 'Dollar went down this Monday 31, March 2025.',
+      content: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
+      author: 'Frijolito Hernandez',
+      createdAt: '01/02/1969'
+    },
+    {
+      id: 2,
+      title: 'A pair of thiefs rubbered the National Bank.',
+      content: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
+      author: 'Pakis Jimenez',
+      createdAt: '01/01/1969'
+    }
+  ],
+  total: '2'
+}
+```
+---
+**URL**: `/api/news/{id}`
+**Method**: `DELETE`
+**Parameters**:
+> | name      |  type     | data type               | description                                                           |
+> |-----------|-----------|-------------------------|-----------------------------------------------------------------------|
+> | id      |  required | String   | Is the ID needed to do the query, this ID must be on the URL.  |
+> | token      |  required | String   | The token is the JWT generated in each session, it must to be in the Authorization headers using Bearer.  |
+
+**Responses**:
+
+> | http code     | content-type                      | response                                                            |
+> |---------------|-----------------------------------|---------------------------------------------------------------------|
+> | `401`         | `application/json`    | `{"message":"Invalid authentication"}`                            |
+> | `403`         | `application/json`    | `{"message":"Your user type isn't allowed to perform this type of actions."}` |
+> | `410`         | `application/json`    | `{"message":"News not found"`  |
+> | `200`         | `application/json`    | `{"message": 'Operation completed successfully', news: {...}}`                      |
+
+**Example response**:
+```js
+{
+  message: 'Operation completed successfully',
+  news: {
+    id: 1,
+    title: 'Dollar went down this Monday 31, March 2025.',
+    content: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
+    author: 'Frijolito Hernandez',
+    createdAt: '01/02/1969'
+  },
+}
+```
 
 ## 🚀 Getting Started
 

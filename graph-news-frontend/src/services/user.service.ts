@@ -38,6 +38,7 @@ async function getAllUsers(token: string): Promise<ListUserResponse> {
                 Authorization: `Bearer ${token}`
             }
         });
+        console.log(response.data);
         return response.data;
     } catch (error) {
         if (axios.isAxiosError(error) && error.response) {
@@ -194,6 +195,27 @@ async function createUserByAdmin(token: string, request: CreateUserRequest): Pro
     }
 }
 
+async function deleteMe(token: string): Promise<GetUserResponse> {
+    try {
+        const response = await axios.delete(`${API_URL}/api/user/delete/me`, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+        return response.data;
+    } catch (error) {
+        if (axios.isAxiosError(error) && error.response) {
+            throw {
+                message: error.response.data.message
+            } as ErrorResponse;
+        } else {
+            throw {
+                message: "An error occurred"
+            } as ErrorResponse;
+        }
+    }
+}
+
 export default {
     getMe,
     getAllUsers,
@@ -202,5 +224,6 @@ export default {
     deleteUser,
     updateMeWithImage,
     updatePassword,
-    createUserByAdmin
+    createUserByAdmin,
+    deleteMe
 };

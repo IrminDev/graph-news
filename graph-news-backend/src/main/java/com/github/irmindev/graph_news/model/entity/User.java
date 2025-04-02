@@ -1,5 +1,6 @@
 package com.github.irmindev.graph_news.model.entity;
 
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 
@@ -42,7 +43,7 @@ public class User implements UserDetails {
     private Role role;
 
     @Column(nullable = false)
-    private Boolean isActive = true;
+    private Boolean isActive;
 
     @OneToMany(mappedBy = "author", fetch = FetchType.LAZY)
     private List<News> news;
@@ -50,6 +51,9 @@ public class User implements UserDetails {
     @Column(columnDefinition = "BYTEA")
     @Basic(fetch = FetchType.LAZY)
     private byte[] image;
+
+    @Column(name = "created_at", nullable = false)
+    private LocalDateTime createdAt;
 
     public User() {
     }
@@ -59,6 +63,12 @@ public class User implements UserDetails {
         this.email = email;
         this.password = password;
         this.role = user;
+        this.isActive = true;
+        this.createdAt = LocalDateTime.now();
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
     }
 
     public Long getId() {
