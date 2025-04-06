@@ -35,6 +35,7 @@ import com.github.irmindev.graph_news.model.exception.UnallowedMethodException;
 import com.github.irmindev.graph_news.model.exception.news.FileIssueException;
 import com.github.irmindev.graph_news.model.exception.news.HTMLInvalidFormatException;
 import com.github.irmindev.graph_news.model.mapper.NewsMapper;
+import com.github.irmindev.graph_news.model.nlp.NewsProcessingResult;
 import com.github.irmindev.graph_news.repository.NewsRepository;
 import com.github.irmindev.graph_news.repository.UserRepository;
 import com.github.irmindev.graph_news.utils.HTMLSanitizer;
@@ -47,9 +48,14 @@ public class NewsService {
     private final HTMLSanitizer htmlSanitizer;
     private final NewsRepository newsRepository;
     private final UserRepository userRepository;
+    private final StanfordNLPProcessor stanfordNLPProcessor;
+    private final Neo4jGraphService neo4jGraphService;
 
     @Autowired
-    public NewsService(HTMLSanitizer htmlSanitizer, NewsRepository newsRepository, UserRepository userRepository) {
+    public NewsService(HTMLSanitizer htmlSanitizer, NewsRepository newsRepository, UserRepository userRepository,
+        StanfordNLPProcessor stanfordNLPProcessor, Neo4jGraphService neo4jGraphService) {
+        this.neo4jGraphService = neo4jGraphService;
+        this.stanfordNLPProcessor = stanfordNLPProcessor;
         this.htmlSanitizer = htmlSanitizer;
         this.newsRepository = newsRepository;
         this.userRepository = userRepository;
@@ -85,6 +91,9 @@ public class NewsService {
             // Sanitize the HTML and create the NewsDTO
             try {
                 NewsDTO newsDTO = htmlSanitizer.sanitize(html);
+                if (newsDTO == null) {
+                    throw new ResourceNotFoundException("Failed to extract content from HTML");
+                }
                 return createNews(newsDTO.getTitle(), newsDTO.getContent(), authorId);
             } catch (HTMLInvalidFormatException e) {
                 throw new ResourceNotFoundException("Failed to extract content from HTML: " + e.getMessage());
@@ -165,6 +174,10 @@ public class NewsService {
         try {
             News newDocument = new News(title, content, author.get());
             News savedDocument = newsRepository.save(newDocument);
+            NewsDTO newsDTO = NewsMapper.toDto(savedDocument);
+            NewsProcessingResult processingResult = stanfordNLPProcessor.processNewsText(newsDTO.getContent(), newsDTO.getTitle());
+
+            neo4jGraphService.storeProcessedNews(processingResult, newsDTO);
             return NewsMapper.toDto(savedDocument);
         } catch (Exception e) {
             logger.error("Error saving news: {}", e.getMessage(), e);

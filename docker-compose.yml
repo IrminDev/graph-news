@@ -19,6 +19,7 @@ services:
       - "8080:8080"
     depends_on:
       - db
+      - neo4j
     environment:
       PORT: 8080
       DATABASE_URL: jdbc:postgresql://db:5432/graph-news
@@ -26,6 +27,9 @@ services:
       DATABASE_PASSWORD: irmin
       JWT_SECRET: c2VjcmV0S2V5MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNA
       JWT_EXPIRATION: 86400000
+      NEO4J_URI: bolt://neo4j:7687
+      NEO4J_USERNAME: neo4j
+      NEO4J_PASSWORD: secretPassword
 
   web:
     build:
@@ -37,5 +41,18 @@ services:
       - "5173:80"
     environment:
       NGINX_PORT: 80
+
+  neo4j:
+    image: neo4j:5.26.5-ubi9
+    container_name: neo4j
+    ports:
+      - "7474:7474"
+      - "7687:7687"
+    environment:
+      NEO4J_AUTH: "neo4j/secretPassword"
+    volumes:
+      - neo4j_data:/data
+    
 volumes:
   pgdata:
+  neo4j_data:
