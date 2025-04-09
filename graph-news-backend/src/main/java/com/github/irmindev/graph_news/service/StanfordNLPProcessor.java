@@ -5,9 +5,11 @@ import edu.stanford.nlp.pipeline.*;
 import edu.stanford.nlp.ling.*;
 import edu.stanford.nlp.trees.*;
 import edu.stanford.nlp.semgraph.*;
-import edu.stanford.nlp.ling.CoreAnnotations.KBPTriplesAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations.NamedEntityTagAnnotation;
+import edu.stanford.nlp.coref.CorefCoreAnnotations;
+import edu.stanford.nlp.coref.data.CorefChain;
 import edu.stanford.nlp.ie.util.RelationTriple;
+import edu.stanford.nlp.naturalli.NaturalLogicAnnotations;
 
 import org.springframework.stereotype.Service;
 
@@ -20,49 +22,57 @@ public class StanfordNLPProcessor {
     public StanfordNLPProcessor() {
         Properties props = new Properties();
         
-        // Annotators (removed coref and relation, added mwt which is required for Spanish)
-        props.setProperty("annotators", "tokenize,ssplit,mwt,pos,lemma,ner,depparse,kbp");
+        props.setProperty("annotators", "tokenize,ssplit,pos,lemma,ner,depparse,parse,natlog,openie,coref");
         
-        // Tokenize
-        props.setProperty("tokenize.language", "es");
-        
-        // Multi-word tokens (mwt) - required for Spanish
-        props.setProperty("mwt.mappingFile", "edu/stanford/nlp/models/mwt/spanish/spanish-mwt.tsv");
-        
-        // POS tagger - fixed model path
-        props.setProperty("pos.model", "edu/stanford/nlp/models/pos-tagger/spanish-ud.tagger");
-        
-        // NER settings
-        props.setProperty("ner.model", "edu/stanford/nlp/models/ner/spanish.ancora.distsim.s512.crf.ser.gz");
         props.setProperty("ner.applyNumericClassifiers", "true");
+
         props.setProperty("ner.useSUTime", "0");
-        props.setProperty("ner.language", "es");
-        
-        // Parse
-        props.setProperty("parse.model", "edu/stanford/nlp/models/srparser/spanishSR.beam.ser.gz");
-        
-        // Dependency parsing
-        props.setProperty("depparse.model", "edu/stanford/nlp/models/parser/nndep/UD_Spanish.gz");
-        props.setProperty("depparse.language", "spanish");
-        
-        // RegexNER
-        props.setProperty("ner.fine.regexner.mapping", "edu/stanford/nlp/models/kbp/spanish/gazetteers/kbp_regexner_mapping_sp.tag");
-        props.setProperty("ner.fine.regexner.validpospattern", "^(NOUN|ADJ|PROPN).*");
-        props.setProperty("ner.fine.regexner.ignorecase", "true");
-        props.setProperty("ner.fine.regexner.noDefaultOverwriteLabels", "CITY,COUNTRY,STATE_OR_PROVINCE");
-        
-        // KBP (Knowledge Base Population)
-        props.setProperty("kbp.semgrex", "edu/stanford/nlp/models/kbp/spanish/semgrex");
-        props.setProperty("kbp.tokensregex", "edu/stanford/nlp/models/kbp/spanish/tokensregex");
-        props.setProperty("kbp.model", "none");
-        props.setProperty("kbp.language", "es");
-        
-        // Entity linking
-        props.setProperty("entitylink.caseless", "true");
-        props.setProperty("entitylink.wikidict", "edu/stanford/nlp/models/kbp/spanish/wikidict_spanish.tsv");
         
         this.pipeline = new StanfordCoreNLP(props);
     }
+
+    private Map<Integer, String> buildCoreferenceMap(CoreDocument document) {
+        Map<Integer, String> pronounMap = new HashMap<>();
+        
+        Map<Integer, CorefChain> corefChains = 
+            document.annotation().get(CorefCoreAnnotations.CorefChainAnnotation.class);
+        
+        if (corefChains == null) return pronounMap;
+        
+        for (CorefChain chain : corefChains.values()) {
+            // Get the representative mention (usually the first and most complete reference)
+            CorefChain.CorefMention representative = chain.getRepresentativeMention();
+            String representativeName = representative.mentionSpan;
+            
+            // Skip chains where representative is a pronoun
+            if (isPronoun(representativeName)) continue;
+            
+            // For each mention in this chain
+            for (CorefChain.CorefMention mention : chain.getMentionsInTextualOrder()) {
+                // If this mention is a pronoun, map it to the representative entity
+                if (isPronoun(mention.mentionSpan)) {
+                    // Get the sentence index and token index
+                    int sentenceIndex = mention.sentNum - 1; // CoreNLP uses 1-based indexing
+                    int headTokenIndex = mention.headIndex - 1;
+                    
+                    // Create a unique key for this mention
+                    int mentionKey = sentenceIndex * 10000 + headTokenIndex;
+                    pronounMap.put(mentionKey, representativeName);
+                }
+            }
+        }
+        
+        return pronounMap;
+    }
+    
+    private boolean isPronoun(String text) {
+        String lower = text.toLowerCase();
+        return lower.equals("he") || lower.equals("she") || lower.equals("it") || 
+               lower.equals("they") || lower.equals("him") || lower.equals("her") || 
+               lower.equals("them") || lower.equals("his") || lower.equals("hers") || 
+               lower.equals("its") || lower.equals("their") || lower.equals("theirs");
+    }
+
     public NewsProcessingResult processNewsText(String newsText, String title) {
         // Create an empty Annotation with the text
         CoreDocument document = new CoreDocument(newsText);
@@ -76,10 +86,10 @@ public class StanfordNLPProcessor {
         result.setText(newsText);
 
         // Extract named entities
-        List<Entity> entities = extractEntities(document);
+        List<Entity> entities = extractAllEntities(document);
         result.setEntities(entities);
 
-        // Extract relationships
+        // Extract relationships using both OpenIE and dependency parsing
         List<Relationship> relationships = extractRelationships(document);
         result.setRelationships(relationships);
 
@@ -88,6 +98,70 @@ public class StanfordNLPProcessor {
         result.setKeyPhrases(keyPhrases);
 
         return result;
+    }
+
+    // Add this method to include OpenIE entities
+    private List<Entity> extractAllEntities(CoreDocument document) {
+        // First get standard NER entities
+        List<Entity> entities = extractEntities(document);
+        Map<String, Entity> entityMap = new HashMap<>();
+        
+        // Convert to map for easier updating
+        for (Entity entity : entities) {
+            entityMap.put(entity.getName().toLowerCase(), entity);
+        }
+        
+        // Add entities from OpenIE triples
+        for (CoreSentence sentence : document.sentences()) {
+            Collection<RelationTriple> triples = sentence.coreMap().get(
+                NaturalLogicAnnotations.RelationTriplesAnnotation.class);
+                
+            if (triples != null) {
+                for (RelationTriple triple : triples) {
+                    // Add subject as entity if substantive
+                    String subject = triple.subjectLemmaGloss();
+                    if (subject.length() > 2 && !subject.matches("\\d+") && 
+                        !isCommonPronoun(subject)) {
+                        addOrUpdateEntity(entityMap, subject, "Concept", 
+                            document.sentences().indexOf(sentence));
+                    }
+                    
+                    // Add object as entity if substantive
+                    String object = triple.objectLemmaGloss();
+                    if (object.length() > 2 && !object.matches("\\d+") && 
+                        !isCommonPronoun(object)) {
+                        addOrUpdateEntity(entityMap, object, "Concept", 
+                            document.sentences().indexOf(sentence));
+                    }
+                }
+            }
+        }
+        
+        return new ArrayList<>(entityMap.values());
+    }
+
+    private void addOrUpdateEntity(Map<String, Entity> entityMap, String name, String type, int position) {
+        String key = name.toLowerCase();
+        if (entityMap.containsKey(key)) {
+            Entity entity = entityMap.get(key);
+            entity.setMentionCount(entity.getMentionCount() + 1);
+            entity.addPosition(position);
+        } else {
+            Entity entity = new Entity();
+            entity.setName(name);
+            entity.setType(type);
+            entity.setMentionCount(1);
+            entity.addPosition(position);
+            entityMap.put(key, entity);
+        }
+    }
+
+    private boolean isCommonPronoun(String text) {
+        String lower = text.toLowerCase();
+        return lower.equals("i") || lower.equals("you") || lower.equals("he") || 
+            lower.equals("she") || lower.equals("it") || lower.equals("we") || 
+            lower.equals("they") || lower.equals("this") || lower.equals("that") ||
+            lower.equals("these") || lower.equals("those");
     }
 
     private List<Entity> extractEntities(CoreDocument document) {
@@ -167,114 +241,316 @@ public class StanfordNLPProcessor {
     private List<Relationship> extractRelationships(CoreDocument document) {
         List<Relationship> relationships = new ArrayList<>();
         Map<String, Set<String>> existingRelations = new HashMap<>();
-    
-        // Process each sentence for relation triples
+        Map<Integer, String> pronounMap = buildCoreferenceMap(document);
+
+        // First, identify all named entities in the document for easy lookup
+        Map<String, String> entityTypes = new HashMap<>();
+        for (Entity entity : extractEntities(document)) {
+            entityTypes.put(entity.getName().toLowerCase(), entity.getType());
+        }
+
+        // Add this at the beginning of extractRelationships
+        System.out.println("RECOGNIZED ENTITIES:");
+        for (Map.Entry<String, String> entry : entityTypes.entrySet()) {
+            System.out.println("  " + entry.getKey() + " (" + entry.getValue() + ")");
+        }
+        
+        // Process each sentence for relationships
         for (CoreSentence sentence : document.sentences()) {
             int sentenceIndex = document.sentences().indexOf(sentence);
             
-            // 1. Extract KBP relation triples (highest quality, domain-specific)
-            List<RelationTriple> kbpTriples = sentence.coreMap().get(
-                KBPTriplesAnnotation.class
-            );
+            // 1. First use OpenIE triples - these are high precision
+            Collection<RelationTriple> triples = sentence.coreMap().get(
+                NaturalLogicAnnotations.RelationTriplesAnnotation.class);
                 
-            if (kbpTriples != null) {
-                for (RelationTriple triple : kbpTriples) {
-                    addRelationship(relationships, existingRelations, 
-                        triple.subjectGloss(), triple.relationGloss(), triple.objectGloss(), 
-                        0.9, sentenceIndex);
+            if (triples != null) {
+                System.out.println("Found " + triples.size() + " OpenIE triples in sentence: " + 
+                      sentence.text().substring(0, Math.min(50, sentence.text().length())) + "...");
+    
+                for (RelationTriple triple : triples) {
+                    System.out.println("  TRIPLE: " + triple.subjectGloss() + " | " + 
+                                    triple.relationGloss() + " | " + triple.objectGloss() + 
+                                    " (Confidence: " + triple.confidence + ")");
+                    
+                    // Debug entity matching
+                    String subjectEntity = findMatchingEntity(triple.subjectGloss(), entityTypes);
+                    String objectEntity = findMatchingEntity(triple.objectGloss(), entityTypes);
+                    
+                    System.out.println("    Matched to entities: " + subjectEntity + " | " + objectEntity);
+                }
+
+                for (RelationTriple triple : triples) {
+                    // Get subject, relation, and object
+                    String subject = triple.subjectLemmaGloss();
+                    String relation = triple.relationLemmaGloss();
+                    String object = triple.objectLemmaGloss();
+
+                    // Replace these lines in the extractRelationships method where you resolve pronouns
+                    // Check if the subject is a pronoun and replace it with the coreference
+                    if (isPronoun(subject)) {
+                        // We need to find the head token for the subject
+                        // Calculating a more reliable key for pronouns
+                        int sentPos = triple.subjectGloss().indexOf(subject);
+                        if (sentPos >= 0) {
+                            // This is a rough approximation - in a full sentence, we need to count tokens
+                            // Split the subject phrase into tokens to find the position
+                            String[] subjectTokens = triple.subjectGloss().split("\\s+");
+                            int tokenOffset = 0;
+                            for (int i = 0; i < subjectTokens.length; i++) {
+                                if (subjectTokens[i].equalsIgnoreCase(subject)) {
+                                    tokenOffset = i;
+                                    break;
+                                }
+                            }
+                            
+                            int mentionKey = sentenceIndex * 10000 + tokenOffset;
+                            System.out.println("  Looking for pronoun resolution for subject: " + subject 
+                                            + " with key: " + mentionKey);
+                            
+                            if (pronounMap.containsKey(mentionKey)) {
+                                String resolvedEntity = pronounMap.get(mentionKey);
+                                System.out.println("  Resolved subject pronoun: " + subject + " -> " + resolvedEntity);
+                                subject = resolvedEntity;
+                            }
+                        }
+                    }
+
+                    // Do the same for object
+                    if (isPronoun(object)) {
+                        // Similar approach for the object
+                        int sentPos = triple.objectGloss().indexOf(object);
+                        if (sentPos >= 0) {
+                            String[] objectTokens = triple.objectGloss().split("\\s+");
+                            int tokenOffset = 0;
+                            for (int i = 0; i < objectTokens.length; i++) {
+                                if (objectTokens[i].equalsIgnoreCase(object)) {
+                                    tokenOffset = i;
+                                    break;
+                                }
+                            }
+                            
+                            int mentionKey = sentenceIndex * 10000 + tokenOffset;
+                            System.out.println("  Looking for pronoun resolution for object: " + object 
+                                            + " with key: " + mentionKey);
+                            
+                            if (pronounMap.containsKey(mentionKey)) {
+                                String resolvedEntity = pronounMap.get(mentionKey);
+                                System.out.println("  Resolved object pronoun: " + object + " -> " + resolvedEntity);
+                                object = resolvedEntity;
+                            }
+                        }
+                    }
+                    
+                    // Only process if subject and object are entities of interest
+                    String subjectEntity = findMatchingEntity(subject, entityTypes);
+                    String objectEntity = findMatchingEntity(object, entityTypes);
+                    
+                    if (subjectEntity != null && objectEntity != null) {
+                        // Normalize relation for Neo4j
+                        String relationType = normalizeRelation(relation);
+                        
+                        // Add the relationship with high confidence (0.95)
+                        addRelationship(relationships, existingRelations,
+                            subjectEntity, relationType, objectEntity, 0.95, sentenceIndex);
+                    }
                 }
             }
             
-            // 2. Use dependency parsing to extract subject-verb-object patterns
+            // 2. Fallback to dependency parsing for additional relationships
             SemanticGraph dependencies = sentence.dependencyParse();
+            
+            // Add this in your extractRelationships method to handle passive voice
+            for (SemanticGraphEdge edge : dependencies.edgeListSorted()) {
+                if (edge.getRelation().toString().equals("nsubjpass")) {
+                    IndexedWord subject = edge.getDependent();
+                    IndexedWord verb = edge.getGovernor();
+                    
+                    // Look for logical subject (often in "by" phrase)
+                    for (SemanticGraphEdge byEdge : dependencies.outgoingEdgeIterable(verb)) {
+                        if (byEdge.getRelation().toString().equals("obl:by") || 
+                            byEdge.getRelation().toString().equals("agent")) {
+                            
+                            IndexedWord agent = byEdge.getDependent();
+                            if (!isSubstantiveWord(agent.originalText())) continue;
+                            
+                            String sourceEntity = findFullEntity(agent, dependencies, entityTypes);
+                            String targetEntity = findFullEntity(subject, dependencies, entityTypes);
+                            
+                            if (sourceEntity != null && targetEntity != null) {
+                                String relationType = normalizeVerb(verb.originalText());
+                                
+                                System.out.println("PASSIVE: Found " + sourceEntity + " -[" + 
+                                                relationType + "]-> " + targetEntity);
+                                
+                                addRelationship(relationships, existingRelations,
+                                    sourceEntity, relationType, targetEntity, 0.85, sentenceIndex);
+                            }
+                        }
+                    }
+                }
+            }
+
             if (dependencies != null) {
-                // Find subjects (who did something)
+                // Find all verb-subject pairs (potential relationship sources)
                 for (SemanticGraphEdge edge : dependencies.edgeListSorted()) {
                     if (edge.getRelation().toString().equals("nsubj")) {
                         IndexedWord subject = edge.getDependent();
                         IndexedWord verb = edge.getGovernor();
                         
-                        // Only consider entities and substantive words
+                        // Check if the subject is a substantive word
                         if (!isSubstantiveWord(subject.originalText())) continue;
                         
-                        // Look for direct objects (what they did to whom)
+                        String sourceEntity = findFullEntity(subject, dependencies, entityTypes);
+                        if (sourceEntity == null) continue;
+                        
+                        // Look for direct objects (targets) of this verb
                         for (SemanticGraphEdge objEdge : dependencies.outgoingEdgeIterable(verb)) {
                             if (objEdge.getRelation().toString().equals("obj") || 
+                                objEdge.getRelation().toString().equals("dobj") ||
                                 objEdge.getRelation().toString().equals("iobj")) {
                                 
                                 IndexedWord object = objEdge.getDependent();
                                 if (!isSubstantiveWord(object.originalText())) continue;
                                 
-                                String relationType = verb.originalText().toUpperCase();
+                                String targetEntity = findFullEntity(object, dependencies, entityTypes);
+                                if (targetEntity == null) continue;
+                                
+                                // Get the normalized verb form as the relationship
+                                String relationType = normalizeVerb(verb.originalText());
+                                
+                                // Add the relationship with good confidence (0.9)
                                 addRelationship(relationships, existingRelations,
-                                    subject.originalText(), relationType, object.originalText(),
-                                    0.85, sentenceIndex);
+                                    sourceEntity, relationType, targetEntity, 0.9, sentenceIndex);
                             }
                         }
                         
-                        // Look for "nmod" relations (with who/what/where)
-                        for (SemanticGraphEdge modEdge : dependencies.outgoingEdgeIterable(verb)) {
-                            if (modEdge.getRelation().toString().startsWith("nmod")) {
-                                IndexedWord modifier = modEdge.getDependent();
-                                if (!isSubstantiveWord(modifier.originalText())) continue;
+                        // Look for preposition-connected objects
+                        // For sentences like "The President spoke with Congress"
+                        for (SemanticGraphEdge prepEdge : dependencies.outgoingEdgeIterable(verb)) {
+                            if (prepEdge.getRelation().toString().startsWith("nmod:") || 
+                                prepEdge.getRelation().toString().equals("nmod")) {
                                 
-                                String relType = verb.originalText() + "_" + 
-                                    modEdge.getRelation().toString().replace("nmod:", "");
+                                IndexedWord prepObject = prepEdge.getDependent();
+                                if (!isSubstantiveWord(prepObject.originalText())) continue;
                                 
+                                String targetEntity = findFullEntity(prepObject, dependencies, entityTypes);
+                                if (targetEntity == null) continue;
+                                
+                                // Get verb + preposition as relationship type
+                                String prep = prepEdge.getRelation().toString().replace("nmod:", "");
+                                String relationType = normalizeVerb(verb.originalText());
+                                
+                                // For "spoke with" -> SPOKE_WITH
+                                if (!prep.equals("nmod")) {
+                                    relationType = relationType + "_" + prep.toUpperCase();
+                                }
+                                
+                                // Add the relationship
                                 addRelationship(relationships, existingRelations,
-                                    subject.originalText(), relType.toUpperCase(), modifier.originalText(),
-                                    0.8, sentenceIndex);
+                                    sourceEntity, relationType, targetEntity, 0.85, sentenceIndex);
                             }
-                        }
-                    }
-                }
-                
-                // 3. Extract entity-to-entity direct relationships (appositions, possessives)
-                for (SemanticGraphEdge edge : dependencies.edgeListSorted()) {
-                    String relation = edge.getRelation().toString();
-                    
-                    // Handle appositions (X, the Y)
-                    if (relation.equals("appos")) {
-                        String source = edge.getGovernor().originalText();
-                        String target = edge.getDependent().originalText();
-                        
-                        if (isSubstantiveWord(source) && isSubstantiveWord(target)) {
-                            addRelationship(relationships, existingRelations,
-                                source, "IS_DESCRIBED_AS", target, 0.85, sentenceIndex);
-                        }
-                    }
-                    
-                    // Handle possessives (X of Y, X's Y)
-                    else if (relation.equals("nmod:poss") || relation.equals("nmod:de")) {
-                        String source = edge.getDependent().originalText();
-                        String target = edge.getGovernor().originalText();
-                        
-                        if (isSubstantiveWord(source) && isSubstantiveWord(target)) {
-                            addRelationship(relationships, existingRelations,
-                                source, "HAS_PROPERTY", target, 0.8, sentenceIndex);
-                        }
-                    }
-                    
-                    // Handle compound nouns (United States)
-                    else if (relation.equals("compound")) {
-                        String modifier = edge.getDependent().originalText();
-                        String head = edge.getGovernor().originalText();
-                        
-                        if (isSubstantiveWord(modifier) && isSubstantiveWord(head)) {
-                            String compoundEntity = modifier + " " + head;
-                            // Add relationship from compound to its parts
-                            addRelationship(relationships, existingRelations,
-                                compoundEntity, "INCLUDES", modifier, 0.7, sentenceIndex);
-                            addRelationship(relationships, existingRelations,
-                                compoundEntity, "INCLUDES", head, 0.7, sentenceIndex);
                         }
                     }
                 }
             }
         }
         
-        // 4. Filter out low-quality and duplicate relationships
         return filterHighQualityRelationships(relationships);
+    }
+    
+    // Helper to find the entity that matches or contains the given text
+    private String findMatchingEntity(String text, Map<String, String> entityTypes) {
+        // Normalize for comparison
+        String normalizedText = text.toLowerCase().trim();
+        
+        // Exact match
+        if (entityTypes.containsKey(normalizedText)) {
+            // Find the original case in the map
+            for (Map.Entry<String, String> entry : entityTypes.entrySet()) {
+                if (entry.getKey().equalsIgnoreCase(normalizedText)) {
+                    return entry.getKey();
+                }
+            }
+        }
+        
+        // Check if the text is part of any entity
+        for (String entity : entityTypes.keySet()) {
+            if (entity.toLowerCase().contains(normalizedText) || 
+                normalizedText.contains(entity.toLowerCase())) {
+                // Return the longer of the two
+                return entity.length() > text.length() ? entity : text;
+            }
+        }
+        
+        return null;
+    }
+    
+    // Helper to normalize relations from OpenIE
+    private String normalizeRelation(String relation) {
+        // Remove extra spaces
+        relation = relation.trim().replaceAll("\\s+", " ");
+        
+        // Replace spaces with underscores and uppercase
+        relation = relation.replaceAll("\\s", "_").toUpperCase();
+        
+        // Remove any characters that aren't allowed in Neo4j relationship types
+        relation = relation.replaceAll("[^A-Z0-9_]", "");
+        
+        return relation;
+    }
+    
+    // Helper to find the full entity containing this word (handles multi-word entities)
+    private String findFullEntity(IndexedWord word, SemanticGraph graph, Map<String, String> entityTypes) {
+        // Start with the word itself
+        String entity = word.originalText();
+        
+        // Check if it's part of a compound
+        for (SemanticGraphEdge edge : graph.incomingEdgeIterable(word)) {
+            if (edge.getRelation().toString().equals("compound")) {
+                entity = edge.getGovernor().originalText() + " " + entity;
+            }
+        }
+        for (SemanticGraphEdge edge : graph.outgoingEdgeIterable(word)) {
+            if (edge.getRelation().toString().equals("compound")) {
+                entity = entity + " " + edge.getDependent().originalText();
+            }
+        }
+        
+        // Check for adjective modifiers
+        for (SemanticGraphEdge edge : graph.incomingEdgeIterable(word)) {
+            if (edge.getRelation().toString().equals("amod")) {
+                entity = edge.getGovernor().originalText() + " " + entity;
+            }
+        }
+        
+        // Case folding and normalization for lookup
+        String normalizedEntity = entity.toLowerCase();
+        
+        // Check if this is a known entity
+        if (entityTypes.containsKey(normalizedEntity)) {
+            return entity;  // Return the original case
+        }
+        
+        // If not a known entity, check if the single word is a known entity
+        if (entityTypes.containsKey(word.originalText().toLowerCase())) {
+            return word.originalText();
+        }
+        
+        // Check if this entity contains a known entity
+        for (String knownEntity : entityTypes.keySet()) {
+            if (normalizedEntity.contains(knownEntity.toLowerCase())) {
+                return entity;
+            }
+        }
+        
+        // Not a known entity, return null
+        return null;
+    }
+    
+    // Helper to normalize verbs
+    private String normalizeVerb(String verb) {
+        // Convert to uppercase for consistency in Neo4j relationship types
+        return verb.toUpperCase().replaceAll("[^A-Z0-9_]", "");
     }
 
     private List<Relationship> filterHighQualityRelationships(List<Relationship> allRelationships) {
@@ -336,19 +612,25 @@ public class StanfordNLPProcessor {
         relationships.add(rel);
     }
 
-
     private boolean isSubstantiveWord(String word) {
-        // Expanded stopwords list
+        // English stopwords list
         List<String> stopwords = Arrays.asList(
-            "el", "la", "los", "las", "un", "una", "unos", "unas", 
-            "y", "o", "a", "de", "del", "en", "que", "por", "con", "para", 
-            "al", "mi", "tu", "su", "este", "esta", "estos", "estas", 
-            "ese", "esa", "esos", "esas", "aquel", "aquella", "aquellos", "aquellas",
-            "sí", "no", "como", "cuando", "donde", "quien", "cuanto", "cuanta"
+            "the", "a", "an", "and", "or", "but", "is", "are", "was", "were", 
+            "be", "been", "being", "have", "has", "had", "do", "does", "did",
+            "to", "at", "in", "on", "by", "for", "with", "about", "against",
+            "between", "into", "through", "during", "before", "after", "above",
+            "below", "from", "up", "down", "of", "off", "over", "under", "again",
+            "further", "then", "once", "here", "there", "when", "where", "why",
+            "how", "all", "any", "both", "each", "few", "more", "most", "other",
+            "some", "such", "no", "nor", "not", "only", "own", "same", "so",
+            "than", "too", "very", "s", "t", "can", "will", "just", "don", "should",
+            "now", "d", "ll", "m", "o", "re", "ve", "y", "ain", "aren", "couldn",
+            "didn", "doesn", "hadn", "hasn", "haven", "isn", "ma", "mightn", "mustn",
+            "needn", "shan", "shouldn", "wasn", "weren", "won", "wouldn"
         );
         
         return !stopwords.contains(word.toLowerCase()) && 
-               word.length() > 1 &&
+               word.length() > 1 && 
                !word.matches("\\d+"); // not just a number
     }
 
@@ -376,14 +658,21 @@ public class StanfordNLPProcessor {
     private List<Tree> getNounPhrases(Tree tree) {
         List<Tree> nounPhrases = new ArrayList<>();
 
-        for (Tree subtree : tree) {
-            if (subtree.label().value().equals("NP")) {
-                nounPhrases.add(subtree);
-            } else if (!subtree.isLeaf()) {
-                nounPhrases.addAll(getNounPhrases(subtree));
-            }
+        if (tree == null) {
+            return nounPhrases;
+        }
+    
+        if (tree.label() != null && "NP".equals(tree.label().value())) {
+            nounPhrases.add(tree);
         }
 
+        for (int i = 0; i < tree.numChildren(); i++) {
+            Tree child = tree.getChild(i);
+            if (child != null && !child.isLeaf()) {
+                nounPhrases.addAll(getNounPhrases(child));
+            }
+        }
+    
         return nounPhrases;
     }
 }

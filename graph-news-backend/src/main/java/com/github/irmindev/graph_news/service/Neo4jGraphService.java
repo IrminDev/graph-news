@@ -47,9 +47,37 @@ public class Neo4jGraphService {
                 }
                 
                 // 3. Create relationships between entities
+                // Modify this section to handle entity name mismatches
                 for (Relationship relationship : processingResult.getRelationships()) {
                     String sourceUuid = entityUuids.get(relationship.getSourceEntity());
                     String targetUuid = entityUuids.get(relationship.getTargetEntity());
+                    
+                    // Debug output to identify the issue
+                    if (sourceUuid == null) {
+                        System.out.println("WARNING: Could not find entity UUID for source: " + relationship.getSourceEntity());
+                        // Try to find a partial match
+                        for (Map.Entry<String, String> entry : entityUuids.entrySet()) {
+                            if (entry.getKey().toLowerCase().contains(relationship.getSourceEntity().toLowerCase()) ||
+                                relationship.getSourceEntity().toLowerCase().contains(entry.getKey().toLowerCase())) {
+                                sourceUuid = entry.getValue();
+                                System.out.println("  Found partial match: " + entry.getKey());
+                                break;
+                            }
+                        }
+                    }
+                    
+                    if (targetUuid == null) {
+                        System.out.println("WARNING: Could not find entity UUID for target: " + relationship.getTargetEntity());
+                        // Try to find a partial match
+                        for (Map.Entry<String, String> entry : entityUuids.entrySet()) {
+                            if (entry.getKey().toLowerCase().contains(relationship.getTargetEntity().toLowerCase()) ||
+                                relationship.getTargetEntity().toLowerCase().contains(entry.getKey().toLowerCase())) {
+                                targetUuid = entry.getValue();
+                                System.out.println("  Found partial match: " + entry.getKey());
+                                break;
+                            }
+                        }
+                    }
                     
                     if (sourceUuid != null && targetUuid != null) {
                         createRelationship(tx, sourceUuid, targetUuid, relationship);
@@ -135,24 +163,33 @@ public class Neo4jGraphService {
     }
     
     private void createRelationship(TransactionContext tx, String sourceUuid, String targetUuid, Relationship relationship) {
-        // Create a normalized relationship type (remove spaces, uppercase)
+        // Create a normalized relationship type
         String relType = relationship.getType()
                      .toUpperCase()
                      .replaceAll("\\s+", "_")
                      .replaceAll(":", "_");
-
-        String query = "MATCH (source:Entity {id: $sourceId}), (target:Entity {id: $targetId}) " +
-                  "MERGE (source)-[r:" + relType + " {type: $originalType, confidence: $confidence}]->(target) " +
-                  "RETURN r";
-                  
-                      
-        Map<String, Object> parameters = new HashMap<>();
-        parameters.put("sourceId", sourceUuid);
-        parameters.put("targetId", targetUuid);
-        parameters.put("originalType", relationship.getType());
-        parameters.put("confidence", relationship.getConfidence());
+    
+        System.out.println("Creating relationship: " + relationship.getSourceEntity() + 
+                          " -[" + relType + "]-> " + relationship.getTargetEntity() + 
+                          " (Original type: " + relationship.getType() + ")");
         
-        tx.run(query, parameters);
+        try {
+            String query = "MATCH (source:Entity {id: $sourceId}), (target:Entity {id: $targetId}) " +
+                          "MERGE (source)-[r:" + relType + " {type: $originalType, confidence: $confidence}]->(target) " +
+                          "RETURN r";
+                      
+            Map<String, Object> parameters = new HashMap<>();
+            parameters.put("sourceId", sourceUuid);
+            parameters.put("targetId", targetUuid);
+            parameters.put("originalType", relationship.getType());
+            parameters.put("confidence", relationship.getConfidence());
+            
+            tx.run(query, parameters);
+            System.out.println("  Relationship created successfully");
+        } catch (Exception e) {
+            System.err.println("  ERROR creating relationship: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
     
     public Map<String, Object> getGraphStatistics() {

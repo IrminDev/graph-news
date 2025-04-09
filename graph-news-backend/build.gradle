@@ -26,8 +26,8 @@ dependencies {
     
     // Stanford NLP
     implementation 'edu.stanford.nlp:stanford-corenlp:4.5.9'
-    implementation 'edu.stanford.nlp:stanford-corenlp:4.5.9:models' // Core models
-    implementation 'edu.stanford.nlp:stanford-corenlp:4.5.9:models-spanish'
+    implementation 'edu.stanford.nlp:stanford-corenlp:4.5.9:models'
+    implementation 'edu.stanford.nlp:stanford-corenlp:4.5.9:models-english'
     
     // Document processing
     implementation 'org.apache.pdfbox:pdfbox:3.0.4'
