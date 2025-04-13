@@ -8,7 +8,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import UserHeader from "../../components/user/UserHeader";
 import Loading from "../../components/Loading";
-import ConfirmationDialog from "../../components/ConfirmationDialogProps";
+import ConfirmationDialog from "../../components/ConfirmationDialog";
 import userService from "../../services/user.service";
 import { getNewsById, deleteNews } from "../../services/news.service";
 import GetUserResponse from "../../model/response/user/GetUserResponse";

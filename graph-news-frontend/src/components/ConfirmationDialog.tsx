@@ -1,18 +1,7 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { AlertCircle, X } from 'lucide-react';
-
-interface ConfirmationDialogProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onConfirm: () => void;
-  title: string;
-  message: string;
-  confirmButtonText?: string;
-  cancelButtonText?: string;
-  type?: 'danger' | 'warning' | 'info';
-  darkMode: boolean;
-}
+import ConfirmationDialogProps from '../model/ConfirmationDialogProps';
 
 const ConfirmationDialog: React.FC<ConfirmationDialogProps> = ({
   isOpen,
