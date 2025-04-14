@@ -1,9 +1,20 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { AlertCircle, X } from 'lucide-react';
-import ConfirmationDialogProps from '../model/ConfirmationDialogProps';
 
-const ConfirmationDialog: React.FC<ConfirmationDialogProps> = ({
+interface DialogBoxProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onConfirm: () => void;
+  title: string;
+  message: string;
+  confirmButtonText?: string;
+  cancelButtonText?: string;
+  type?: 'danger' | 'warning' | 'info';
+  darkMode: boolean;
+}
+
+const DialogBox: React.FC<DialogBoxProps> = ({
   isOpen,
   onClose,
   onConfirm,
@@ -165,4 +176,4 @@ const ConfirmationDialog: React.FC<ConfirmationDialogProps> = ({
   );
 };
 
-export default ConfirmationDialog;
+export default DialogBox;

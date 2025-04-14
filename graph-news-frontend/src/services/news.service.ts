@@ -143,6 +143,101 @@ async function deleteNews(token: string, id: string): Promise<any> {
     }
 }
 
+async function getLatestNews(token: string, limit: number = 5): Promise<any> {
+    try {
+        const response = await axios.get(`${API_URL}/api/news/latest`, {
+            params: { limit },
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+        return response.data;
+    } catch (error) {
+        if(axios.isAxiosError(error) && error.response) {
+            throw {
+                message: error.response.data.message
+            } as ErrorResponse;
+        }
+        throw {
+            message: "An error occurred while fetching the latest news"
+        } as ErrorResponse;
+    }
+}
+
+async function getNewsByDateRange(
+    token: string, 
+    startDate: string, 
+    endDate: string,
+    page: number = 0, 
+    size: number = 10
+): Promise<any> {
+    try {
+        const response = await axios.get(`${API_URL}/api/news/date-range`, {
+            params: { startDate, endDate, page, size },
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+        return response.data;
+    } catch (error) {
+        if(axios.isAxiosError(error) && error.response) {
+            throw {
+                message: error.response.data.message
+            } as ErrorResponse;
+        }
+        throw {
+            message: "An error occurred while fetching news by date range"
+        } as ErrorResponse;
+    }
+}
+
+async function getUserNewsByDateRange(
+    token: string, 
+    userId: string, 
+    startDate: string, 
+    endDate: string,
+    page: number = 0, 
+    size: number = 10
+): Promise<any> {
+    try {
+        // First get all user news with pagination
+        const response = await getUserNewsPaged(token, userId, page, size);
+        
+        if (!response || !response.newsList) {
+            return { newsList: [], totalCount: 0 };
+        }
+        
+        // Then filter on client-side by date range if dates provided
+        if (startDate && endDate) {
+            const startDateObj = new Date(startDate);
+            const endDateObj = new Date(endDate);
+            
+            const filteredNews = response.newsList.filter((news: any) => {
+                if (!news.createdAt) return false;
+                const newsDate = new Date(news.createdAt);
+                return newsDate >= startDateObj && newsDate <= endDateObj;
+            });
+            
+            return { 
+                newsList: filteredNews,
+                totalCount: filteredNews.length
+            };
+        }
+        
+        // Return original response if no date filtering
+        return response;
+    } catch (error) {
+        if(axios.isAxiosError(error) && error.response) {
+            throw {
+                message: error.response.data.message
+            } as ErrorResponse;
+        }
+        throw {
+            message: "An error occurred while fetching user news by date range"
+        } as ErrorResponse;
+    }
+}
+
 export {
     uploadNewsFile,
     uploadNewsContent,
@@ -150,5 +245,8 @@ export {
     getNewsById,
     getUserNews,
     getUserNewsPaged,
-    deleteNews
+    deleteNews,
+    getLatestNews,
+    getNewsByDateRange,
+    getUserNewsByDateRange
 };

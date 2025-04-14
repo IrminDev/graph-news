@@ -1,7 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import NewsCarouselProps from '../../model/NewsCarouselProps';
+
+interface NewsCarouselProps {
+  children: React.ReactNode[];
+  itemsPerPage?: number;
+  darkMode: boolean;
+}
 
 const NewsCarousel: React.FC<NewsCarouselProps> = ({ children, itemsPerPage = 3, darkMode }) => {
   const [page, setPage] = useState(0);

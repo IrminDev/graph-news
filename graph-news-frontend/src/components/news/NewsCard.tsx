@@ -1,10 +1,12 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
-import { Calendar, ArrowUpRight, Trash2, Network, Loader } from "lucide-react";
+import { Calendar, Trash2, Network, Loader } from "lucide-react";
 import { Link } from "react-router-dom";
+import News from "../../model/News";
+import { formatDate, getTimeLabel, getTimeLabelClasses } from "../../utils/timeLabels";
 
 interface NewsCardProps {
-  news: any;
+  news: News;
   darkMode: boolean;
   onDelete: (id: string) => Promise<void>;
   onDeleteClick: (id: string) => void;
@@ -13,23 +15,14 @@ interface NewsCardProps {
 const NewsCard: React.FC<NewsCardProps> = ({ news, darkMode, onDeleteClick }) => {
   const [isDeleting, setIsDeleting] = useState(false);
   
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', { 
-      year: 'numeric', 
-      month: 'short', 
-      day: 'numeric' 
-    });
-  };
- 
   const handleDeleteClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     e.preventDefault();
-    onDeleteClick(news.id);
+    onDeleteClick(news.id.toString());
   };
   
-  const status = news.status || "Processing";
-  const category = news.category || "Uncategorized";
+  const timeLabel = getTimeLabel(news.createdAt);
+  const timeLabelClasses = getTimeLabelClasses(timeLabel, darkMode);
 
   return (
     <motion.div
@@ -90,25 +83,9 @@ const NewsCard: React.FC<NewsCardProps> = ({ news, darkMode, onDeleteClick }) =>
             }`} />
             <span className={`text-xs ${
               darkMode ? 'text-slate-400' : 'text-slate-500'
-            }`}>
+            }`}>              
               {news.createdAt ? formatDate(news.createdAt) : "No date"}
             </span>
-          </div>
-          
-          <div className="flex items-center">
-            {news.url && (
-              <a 
-                href={news.url} 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className={`inline-flex items-center text-sm font-medium ${
-                  darkMode ? 'text-indigo-400 hover:text-indigo-300' : 'text-indigo-600 hover:text-indigo-800'
-                }`}
-              >
-                View Source
-                <ArrowUpRight className="w-4 h-4 ml-1" />
-              </a>
-            )}
           </div>
         </div>
       </div>
@@ -116,18 +93,9 @@ const NewsCard: React.FC<NewsCardProps> = ({ news, darkMode, onDeleteClick }) =>
       <div className={`px-5 py-3 border-t flex justify-between items-center ${
         darkMode ? 'border-slate-700 bg-slate-800/50' : 'border-slate-100 bg-slate-50'
       }`}>
-        <div className="flex items-center space-x-2">
-          <div className={`px-2 py-1 rounded-full text-xs font-medium ${
-            darkMode ? 'bg-slate-700 text-indigo-300' : 'bg-indigo-100 text-indigo-800'
-          }`}>
-            {category}
-          </div>
-          <div className={`px-2 py-1 rounded-full text-xs font-medium ${
-            status.toLowerCase() === 'completed'
-              ? darkMode ? 'bg-green-900/30 text-green-400' : 'bg-green-100 text-green-800'
-              : darkMode ? 'bg-amber-900/30 text-amber-400' : 'bg-amber-100 text-amber-800'
-          }`}>
-            {status}
+        <div>
+          <div className={`px-2 py-1 rounded-full text-xs font-medium ${timeLabelClasses}`}>
+            {timeLabel}
           </div>
         </div>
         
