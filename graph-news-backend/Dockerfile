@@ -34,4 +34,4 @@ ENV CHROME_DRIVER=/usr/bin/chromedriver
 # Copy the built JAR from the builder stage
 COPY --from=builder /app/build/libs/graph-news-0.0.1-SNAPSHOT.jar /app/app.jar
 
-CMD ["java", "-jar", "app.jar"]
+CMD ["java", "-Xms2g", "-Xmx4g", "-jar", "app.jar"]
