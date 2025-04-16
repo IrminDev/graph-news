@@ -13,5 +13,6 @@
     "forceConsistentCasingInFileNames": true,
     "types": ["react", "react-dom"]
   },
-  "include": ["src"]
+  "include": ["src"],
+  "exclude": ["src/model/response"]
 }
