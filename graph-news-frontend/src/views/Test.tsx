@@ -370,6 +370,7 @@ const GraphVisualization: React.FC = () => {
                 enableNavigationControls={true}
               />
             ) : graphData && (
+              // For the 2D graph visualization section
               <ForceGraph2D
                 ref={graphRef}
                 graphData={graphData}
@@ -379,23 +380,50 @@ const GraphVisualization: React.FC = () => {
                 linkSource="source"
                 linkTarget="target"
                 linkLabel={(link: any) => link.type}
-                linkWidth="value"
-                linkColor="color"
-                linkDirectionalParticles={2}
-                linkDirectionalParticleWidth={(link: any) => link.value * 0.5}
+                
+                // Modify link styling to make all relationships visible
+                linkWidth={(link: any) => {
+                  // Make entity-entity links thicker to stand out
+                  return link.type === 'MENTIONED_IN' ? 
+                    link.value : 
+                    Math.max(link.value * 2, 1.5); // Ensure entity-entity relationships are visible
+                }}
+                
+                linkColor={(link: any) => {
+                  return link.type === 'MENTIONED_IN' ? 
+                    'rgba(150, 150, 150, 0.5)' : // Gray for MENTIONED_IN
+                    'rgba(50, 50, 180, 0.8)'; // Darker, more opaque blue for entity-entity relationships
+                }}
+
+                // Add particles to all links with more particles for non-MENTIONED_IN links
+                linkDirectionalParticles={(link: any) => 
+                  link.type === 'MENTIONED_IN' ? 2 : 4
+                }
+                
+                // Make particles larger for non-MENTIONED_IN links
+                linkDirectionalParticleWidth={(link: any) => 
+                  link.type === 'MENTIONED_IN' ? 
+                  link.value * 0.5 : 
+                  link.value * 1.5
+                }
+                
                 onNodeClick={handleNodeClick}
-                // 2D-specific configurations - improve node separation
-                d3AlphaDecay={0.01} // Slower cooling
-                d3VelocityDecay={0.08} // Less friction
-                cooldownTicks={200} // Run simulation longer
-
-                // Cap node size for 2D visualization
-                nodeVal={(node) => Math.min(node.val * 1.2, 18)} // Cap maximum size
-
-                // Custom node rendering with better spacing
+                
+                // 2D-specific configurations
+                d3AlphaDecay={0.01}
+                d3VelocityDecay={0.08}
+                cooldownTicks={200}
+                
+                // Use force simulation to improve layout
+                d3AlphaMin={0.001}
+                
+                // Cap node size
+                nodeVal={(node) => Math.min(node.val * 1.2, 18)}
+                
+                // Custom node rendering
                 nodeCanvasObject={(node, ctx, globalScale) => {
                   // Node circle with capped size
-                  const nodeSize = Math.min(node.val * 1.2, 18); // Cap maximum circle size
+                  const nodeSize = Math.min(node.val * 1.2, 18);
                   
                   ctx.beginPath();
                   ctx.arc((node.x ?? 0), (node.y ?? 0), nodeSize, 0, 2 * Math.PI);
@@ -419,7 +447,7 @@ const GraphVisualization: React.FC = () => {
                   
                   ctx.fillRect(
                     (node.x ?? 0) - textWidth / 2 - 2,
-                    (node.y ?? 0) + nodeSize + 2, // Use capped size for positioning
+                    (node.y ?? 0) + nodeSize + 2,
                     textWidth + 4,
                     fontSize + 4
                   );
@@ -430,7 +458,90 @@ const GraphVisualization: React.FC = () => {
                   ctx.fillStyle = node.type === 'News' ? '#ffffff' : '#000000';
                   ctx.fillText(label, (node.x ?? 0), (node.y ?? 0) + nodeSize + fontSize / 2 + 4);
                 }}
-
+                
+                linkCanvasObject={(link, ctx, globalScale) => {
+                  // Only render custom appearances for non-MENTIONED_IN links
+                  if (link.type !== 'MENTIONED_IN') {
+                    const start = link.source;
+                    const end = link.target;
+                    
+                    if (typeof start !== 'object' || typeof end !== 'object') return;
+                    
+                    // Calculate link position
+                    const sourceX = start.x || 0;
+                    const sourceY = start.y || 0;
+                    const targetX = end.x || 0;
+                    const targetY = end.y || 0;
+                    
+                    // Draw custom link appearance with darker, more noticeable line
+                    ctx.beginPath();
+                    ctx.moveTo(sourceX, sourceY);
+                    ctx.lineTo(targetX, targetY);
+                    
+                    // Use a darker color based on relationship type
+                    // This creates more visible, distinct relationships
+                    switch(link.type) {
+                      case 'RELATED_TO':
+                        ctx.strokeStyle = 'rgba(50, 80, 200, 0.85)'; // Dark blue
+                        break;
+                      case 'LOCATED_IN':
+                      case 'LOCATION_OF':
+                        ctx.strokeStyle = 'rgba(20, 150, 50, 0.85)'; // Dark green
+                        break;
+                      case 'PART_OF':
+                      case 'HAS_PART':
+                        ctx.strokeStyle = 'rgba(180, 50, 50, 0.85)'; // Dark red
+                        break;
+                      case 'WORKS_FOR':
+                      case 'EMPLOYS':
+                        ctx.strokeStyle = 'rgba(180, 120, 20, 0.85)'; // Dark orange
+                        break;
+                      default:
+                        ctx.strokeStyle = 'rgba(100, 50, 150, 0.85)'; // Dark purple fallback
+                    }
+                    
+                    // Thicker lines for entity-entity relationships
+                    ctx.lineWidth = Math.max(link.value * 2.5, 2.0);
+                    ctx.stroke();
+                    
+                    // Add arrow to show direction
+                    const headSize = 6 / globalScale;
+                    const dx = targetX - sourceX;
+                    const dy = targetY - sourceY;
+                    const angle = Math.atan2(dy, dx);
+                    
+                    // Calculate arrow position (slightly before the target)
+                    const arrowLength = Math.sqrt(dx * dx + dy * dy);
+                    const nodeRadius = typeof end.val === 'number' ? Math.min(end.val * 1.2, 18) : 5;
+                    const arrowRatio = (arrowLength - nodeRadius) / arrowLength;
+                    
+                    const arrowX = sourceX + dx * arrowRatio;
+                    const arrowY = sourceY + dy * arrowRatio;
+                    
+                    // Draw arrow head
+                    ctx.beginPath();
+                    ctx.moveTo(arrowX, arrowY);
+                    ctx.lineTo(
+                      arrowX - headSize * Math.cos(angle - Math.PI / 6),
+                      arrowY - headSize * Math.sin(angle - Math.PI / 6)
+                    );
+                    ctx.lineTo(
+                      arrowX - headSize * Math.cos(angle + Math.PI / 6),
+                      arrowY - headSize * Math.sin(angle + Math.PI / 6)
+                    );
+                    ctx.closePath();
+                    ctx.fill();
+                    
+                    return true; // Return true to indicate we've rendered this link
+                  }
+                  
+                  return false; // Let the default renderer handle MENTIONED_IN links
+                }}
+                
+                linkCanvasObjectMode={(link) => 
+                  link.type !== 'MENTIONED_IN' ? 'replace' : undefined
+                }
+                
                 onEngineStop={() => handleZoomToFit()}
                 onEngineTick={() => {
                   try {
@@ -466,7 +577,6 @@ const GraphVisualization: React.FC = () => {
                     console.error("Error in 2D engine tick:", error);
                   }
                 }}
-                
               />
             )}
           </div>
