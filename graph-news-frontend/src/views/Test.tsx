@@ -3,9 +3,6 @@ import { useParams, useNavigate } from 'react-router-dom';
 import ForceGraph2D from 'react-force-graph-2d';
 import { getNewsGraph } from '../services/graph.service';
 import { getNewsById } from '../services/news.service';
-import NewsResponse from '../model/response/news/NewsResponse';
-import GraphResponse from '../model/response/graph/GraphResponse';
-
 interface GraphData {
   nodes: Node[];
   links: Link[];
@@ -249,13 +246,13 @@ const GraphVisualization: React.FC = () => {
                 nodeCanvasObject={(node, ctx, globalScale) => {
                     // Node circle
                     ctx.beginPath();
-                    ctx.arc(node.x, node.y, node.val || 1, 0, 2 * Math.PI);
+                    ctx.arc((node.x ?? 0),(node.y ?? 0), node.val || 1, 0, 2 * Math.PI);
                     ctx.fillStyle = node.color;
                     ctx.fill();
 
                     // Only display labels for important nodes or on hover
                     const fontSize = 12 / globalScale;
-                    const isHighlighted = node.__highlighted || node.mentionCount > 3 || node.type === 'News';
+                    const isHighlighted = node.__highlighted || (node.mentionCount ?? 0) > 3 || node.type === 'News';
                     
                     if (isHighlighted || globalScale > 0.8) {
                     // Add a white background for text
@@ -266,8 +263,8 @@ const GraphVisualization: React.FC = () => {
                     // Draw background
                     ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
                     ctx.fillRect(
-                        node.x - textWidth / 2 - 2,
-                        node.y - fontSize / 2 - 2,
+                        (node.x ?? 0) - fontSize / 2 - 2,
+                        (node.y ?? 0) - fontSize / 2 - 2,
                         textWidth + 4,
                         fontSize + 4
                     );
@@ -276,16 +273,12 @@ const GraphVisualization: React.FC = () => {
                     ctx.textAlign = 'center';
                     ctx.textBaseline = 'middle';
                     ctx.fillStyle = '#000000';
-                    ctx.fillText(label, node.x, node.y);
+                    ctx.fillText(label, (node.x ?? 0), (node.y ?? 0));
                     }
                 }}
                 
-                // Add these force configuration parameters
-                d3Force="charge" 
-                dagMode={null}
+                dagMode={undefined}
                 dagLevelDistance={50}
-                // Increase repulsive forces between nodes
-                d3ForceCharge={node => -150 * (node.val || 1)}
                 />
             )}
           </div>
