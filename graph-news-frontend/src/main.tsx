@@ -12,6 +12,7 @@ import UploadNewsPage from './views/user/UploadNewsPage'
 import UserSettingsPage from './views/user/UserSettingsProfile'
 import CreateUserPage from './views/admin/CreateUserPage'
 import NewsDetailPage from './views/user/NewsDetailPage'
+import GraphVisualization from './views/Test'
 
 createRoot(document.getElementById('root')!).render(
   <>
@@ -27,6 +28,7 @@ createRoot(document.getElementById('root')!).render(
       <Route path='/admin/dashboard' element={<AdminDashboardPage />} />
       <Route path='/admin/update/:id' element={<UserUpdatePage/>} />
       <Route path="/admin/create-user" element={<CreateUserPage />} />
+      <Route path="/graph/:newsId" element={<GraphVisualization />} />
     </Routes>
   </BrowserRouter>
   <ToastContainer />
