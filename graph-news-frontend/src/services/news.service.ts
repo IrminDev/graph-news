@@ -269,6 +269,27 @@ async function searchNews(
     }
   }
 
+  async function getRelatedNews(
+    newsId: string,
+    limit: number = 5
+  ): Promise<any> {
+    try {
+      const response = await axios.get(`${API_URL}/api/news/${newsId}/related`, {
+        params: { limit }
+      });
+      return response.data;
+    } catch (error) {
+      if(axios.isAxiosError(error) && error.response) {
+        throw {
+          message: error.response.data.message
+        } as ErrorResponse;
+      }
+      throw {
+        message: "An error occurred while fetching related news"
+      } as ErrorResponse;
+    }
+  }
+
 export {
     uploadNewsFile,
     uploadNewsContent,
@@ -280,5 +301,6 @@ export {
     getLatestNews,
     getNewsByDateRange,
     getUserNewsByDateRange,
-    searchNews
+    searchNews,
+    getRelatedNews
 };
