@@ -8,6 +8,7 @@ import * as THREE from 'three';
 import SpriteText from 'three-spritetext';
 import { motion } from 'framer-motion';
 import { Network, Calendar, ArrowLeft, Maximize, RotateCw, Cpu, Layers, ChevronDown, HelpCircle, Activity } from 'lucide-react';
+import GraphExporter from '../components/news/GraphExporter';
 
 interface GraphData {
   nodes: Node[];
@@ -87,6 +88,7 @@ const GraphVisualization: React.FC = () => {
         const graphResponse = await getNewsGraph(newsId);
         if (graphResponse && graphResponse.graph) {
           transformGraphData(graphResponse.graph);
+          console.log('Graph Response:', graphResponse);
         } else {
           setError('Failed to fetch graph data');
         }
@@ -101,6 +103,7 @@ const GraphVisualization: React.FC = () => {
   }, [newsId]);
 
   const transformGraphData = (graphData: any) => {
+    console.log('Transforming graph data:', graphData);
     // Transform the data for force-graph - Keep existing logic
     const nodes: Node[] = [
       // News node (central)
@@ -441,6 +444,15 @@ const GraphVisualization: React.FC = () => {
           >
             {showLegend ? 'Hide' : 'Show'} Legend
           </Button>
+          
+          {/* Add the GraphExporter component here */}
+          {graphData && (
+            <GraphExporter 
+              graphData={graphData} 
+              darkMode={darkMode} 
+              fileName={`graph-${newsId}`} 
+            />
+          )}
           
           {graphData && (
             <div className={`ml-auto flex items-center ${

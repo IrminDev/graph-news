@@ -12,7 +12,7 @@ import UploadNewsPage from './views/user/UploadNewsPage'
 import UserSettingsPage from './views/user/UserSettingsProfile'
 import CreateUserPage from './views/admin/CreateUserPage'
 import NewsDetailPage from './views/user/NewsDetailPage'
-import GraphVisualization from './views/Test'
+import GraphVisualization from './views/Graph'
 import SearchNewsPage from './views/SearchNewsPage'
 
 createRoot(document.getElementById('root')!).render(
