@@ -43,7 +43,7 @@ const NewsCard: React.FC<NewsCardProps> = ({ news, darkMode, onDeleteClick }) =>
           
           <div className="flex space-x-2">
             <Link 
-              to={`/user/news/${news.id}#graph`}
+              to={`/graph/${news.id}`}
               className={`p-1.5 rounded-full transition-colors ${
                 darkMode ? 'text-slate-400 hover:bg-indigo-900/30 hover:text-indigo-400' : 'text-slate-500 hover:bg-indigo-50 hover:text-indigo-600'
               }`}

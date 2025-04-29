@@ -238,6 +238,58 @@ async function getUserNewsByDateRange(
     }
 }
 
+/**
+ * Search for news articles based on a query string
+ */
+async function searchNews(
+    token: string, 
+    query: string, 
+    page: number = 0, 
+    size: number = 10
+  ): Promise<any> {
+    try {
+      const headers = token 
+        ? { Authorization: `Bearer ${token}` } 
+        : undefined;
+      
+      const response = await axios.get(`${API_URL}/api/news/search`, {
+        params: { query, page, size },
+        headers
+      });
+      return response.data;
+    } catch (error) {
+      if(axios.isAxiosError(error) && error.response) {
+        throw {
+          message: error.response.data.message
+        } as ErrorResponse;
+      }
+      throw {
+        message: "An error occurred while searching for news"
+      } as ErrorResponse;
+    }
+  }
+
+  async function getRelatedNews(
+    newsId: string,
+    limit: number = 5
+  ): Promise<any> {
+    try {
+      const response = await axios.get(`${API_URL}/api/news/${newsId}/related`, {
+        params: { limit }
+      });
+      return response.data;
+    } catch (error) {
+      if(axios.isAxiosError(error) && error.response) {
+        throw {
+          message: error.response.data.message
+        } as ErrorResponse;
+      }
+      throw {
+        message: "An error occurred while fetching related news"
+      } as ErrorResponse;
+    }
+  }
+
 export {
     uploadNewsFile,
     uploadNewsContent,
@@ -248,5 +300,7 @@ export {
     deleteNews,
     getLatestNews,
     getNewsByDateRange,
-    getUserNewsByDateRange
+    getUserNewsByDateRange,
+    searchNews,
+    getRelatedNews
 };

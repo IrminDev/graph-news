@@ -2,20 +2,87 @@ import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { 
   ArrowLeft, Trash2, Network, Calendar,
-  User, MessageCircle, FileText 
+  User, MessageCircle, FileText, ExternalLink
 } from "lucide-react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, Link } from "react-router-dom";
 import { toast } from "react-toastify";
 import UserHeader from "../../components/user/UserHeader";
 import Loading from "../../components/Loading";
 import DialogBox from "../../components/DialogBox";
 import userService from "../../services/user.service";
-import { getNewsById, deleteNews } from "../../services/news.service";
+import { getNewsById, deleteNews, getRelatedNews } from "../../services/news.service";
 import GetUserResponse from "../../model/response/user/GetUserResponse";
 import ErrorResponse from "../../model/response/ErrorResponse";
 import NewsResponse from "../../model/response/news/NewsResponse";
 import News from "../../model/News";
 import { getTimeLabel, getTimeLabelClasses, formatDate } from "../../utils/timeLabels";
+
+const RelatedNewsCard: React.FC<{
+  news: News;
+  darkMode: boolean;
+}> = ({ news, darkMode }) => {
+  const timeLabel = getTimeLabel(news.createdAt);
+  const timeLabelClasses = getTimeLabelClasses(timeLabel, darkMode);
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
+      className={`rounded-xl border transition-all duration-500 hover:shadow-lg ${
+        darkMode 
+          ? 'bg-slate-800 border-slate-700 hover:shadow-indigo-500/10' 
+          : 'bg-white border-slate-200 hover:shadow-blue-300/20'
+      }`}
+    >
+      <div className="p-5">
+        <h3 className={`text-lg font-semibold mb-2 ${
+          darkMode ? 'text-white' : 'text-slate-800'
+        }`}>{news.title}</h3>
+        
+        <p className={`mb-3 line-clamp-2 ${
+          darkMode ? 'text-slate-300' : 'text-slate-600'
+        }`}>
+          {news.content 
+            ? news.content.substring(0, 120) + (news.content.length > 120 ? '...' : '')
+            : "No content available."}
+        </p>
+        
+        <div className="flex justify-between items-center mt-4">
+          <div className="flex items-center space-x-1">
+            <Calendar className={`w-4 h-4 ${
+              darkMode ? 'text-slate-400' : 'text-slate-500'
+            }`} />
+            <span className={`text-xs ${
+              darkMode ? 'text-slate-400' : 'text-slate-500'
+            }`}>              
+              {news.createdAt ? formatDate(news.createdAt) : "No date"}
+            </span>
+          </div>
+        </div>
+      </div>
+      
+      <div className={`px-5 py-3 border-t flex justify-between items-center ${
+        darkMode ? 'border-slate-700 bg-slate-800/50' : 'border-slate-100 bg-slate-50'
+      }`}>
+        <div>
+          <div className={`px-2 py-1 rounded-full text-xs font-medium ${timeLabelClasses}`}>
+            {timeLabel}
+          </div>
+        </div>
+        
+        <Link 
+          to={`/user/news/${news.id}`}
+          className={`text-sm font-medium ${
+            darkMode ? 'text-indigo-400 hover:text-indigo-300' : 'text-indigo-600 hover:text-indigo-800'
+          }`}
+        >
+          View Details
+        </Link>
+      </div>
+    </motion.div>
+  );
+};
 
 const NewsDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -23,6 +90,8 @@ const NewsDetailPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState(false);
   const [news, setNews] = useState<News | null>(null);
+  const [relatedNews, setRelatedNews] = useState<News[]>([]);
+  const [loadingRelated, setLoadingRelated] = useState(false);
   const [user, setUser] = useState<any>(null);
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
   const [darkMode, setDarkMode] = useState(
@@ -70,6 +139,9 @@ const NewsDetailPage: React.FC = () => {
             .then((response: NewsResponse) => {
               setNews(response.news);
               setLoading(false);
+              
+              // After news is loaded, fetch related news
+              fetchRelatedNews(id);
             })
             .catch((error: ErrorResponse) => {
               toast.error(error.message || "Failed to load news article");
@@ -82,6 +154,24 @@ const NewsDetailPage: React.FC = () => {
         navigate("/sign-in");
       });
   }, [id, navigate]);
+  
+  const fetchRelatedNews = async (newsId: string) => {
+    setLoadingRelated(true);
+    try {
+      const response = await getRelatedNews(newsId);
+      if (response && response.newsList) {
+        // Filter out the current article if it's in the related list
+        setRelatedNews(response.newsList.filter((item: News) => 
+          item.id !== Number(newsId)
+        ));
+      }
+    } catch (error: any) {
+      console.error("Error fetching related news:", error);
+      // Don't show toast for this error as it's not critical
+    } finally {
+      setLoadingRelated(false);
+    }
+  };
   
   const openDeleteConfirmation = () => {
     setShowDeleteConfirmation(true);
@@ -114,8 +204,11 @@ const NewsDetailPage: React.FC = () => {
   };
   
   const handleViewGraph = () => {
-    // Reserved for future implementation of knowledge graph visualization
-    toast.info("Knowledge graph visualization will be available in a future update");
+    if (id) {
+      navigate(`/graph/${id}`);
+    } else {
+      toast.error("News ID is required to view the graph");
+    }
   };
   
   if (loading || !news) {
@@ -292,7 +385,7 @@ const NewsDetailPage: React.FC = () => {
             </div>
           </div>
           
-          {/* Related News Section (placeholder for future implementation) */}
+          {/* Related News Section */}
           <div className="mt-8">
             <h2 className={`text-xl font-bold mb-4 ${
               darkMode ? 'text-white' : 'text-slate-800'
@@ -300,18 +393,38 @@ const NewsDetailPage: React.FC = () => {
               Related News
             </h2>
             
-            <div className={`rounded-lg border p-8 text-center ${
-              darkMode 
-                ? 'bg-slate-900 border-slate-800' 
-                : 'bg-white border-slate-200'
-            }`}>
-              <MessageCircle className={`w-10 h-10 mx-auto mb-3 ${
-                darkMode ? 'text-slate-700' : 'text-slate-300'
-              }`} />
-              <p className={darkMode ? 'text-slate-400' : 'text-slate-600'}>
-                Related articles based on knowledge graph connections will appear here
-              </p>
-            </div>
+            {loadingRelated ? (
+              <div className={`rounded-lg border p-6 flex justify-center ${
+                darkMode 
+                  ? 'bg-slate-900 border-slate-800' 
+                  : 'bg-white border-slate-200'
+              }`}>
+                <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-indigo-500"></div>
+              </div>
+            ) : relatedNews.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {relatedNews.map((item, idx) => (
+                  <RelatedNewsCard 
+                    key={item.id || idx} 
+                    news={item} 
+                    darkMode={darkMode} 
+                  />
+                ))}
+              </div>
+            ) : (
+              <div className={`rounded-lg border p-8 text-center ${
+                darkMode 
+                  ? 'bg-slate-900 border-slate-800' 
+                  : 'bg-white border-slate-200'
+              }`}>
+                <MessageCircle className={`w-10 h-10 mx-auto mb-3 ${
+                  darkMode ? 'text-slate-700' : 'text-slate-300'
+                }`} />
+                <p className={darkMode ? 'text-slate-400' : 'text-slate-600'}>
+                  No related articles found based on shared entities
+                </p>
+              </div>
+            )}
           </div>
         </div>
       </main>

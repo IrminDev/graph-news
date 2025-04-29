@@ -7,8 +7,13 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.pdmodel.PDDocument;
@@ -18,7 +23,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -307,22 +314,39 @@ public class NewsService {
     }
 
     /**
-     * Busca noticias por título o contenido
+     * Search for news articles containing the specified query in title or content
+     * 
+     * @param query The search query
+     * @param page Page number (zero-based)
+     * @param size Number of items per page
+     * @return List of news articles matching the search criteria
      */
-    public Page<NewsDTO> searchNews(String searchTerm, Pageable pageable) {
-        if (searchTerm == null) {
-            throw new IllegalArgumentException("Search term cannot be null");
+    public Page<NewsDTO> searchNews(String query, int page, int size) {
+        if (query == null || query.trim().isEmpty()) {
+            throw new IllegalArgumentException("Search query cannot be empty");
         }
         
-        if (pageable == null) {
-            throw new IllegalArgumentException("Pageable cannot be null");
-        }
+        // Normalize query - trim and remove multiple spaces
+        String normalizedQuery = query.trim().replaceAll("\\s+", " ");
         
         try {
-            Page<News> newsPage = newsRepository.searchByTitleOrContent(searchTerm, pageable);
+            // Create pageable object with sorting by relevance (most recent first as a proxy for relevance)
+            Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+            
+            // Try full-text search first
+            Page<News> newsPage;
+            try {
+                newsPage = newsRepository.searchByTitleOrContent(normalizedQuery, pageable);
+            } catch (Exception e) {
+                // Fall back to LIKE search if full-text search fails
+                logger.warn("Full-text search failed, falling back to LIKE search: {}", e.getMessage());
+                newsPage = newsRepository.searchByTitleOrContentLike(normalizedQuery, pageable);
+            }
+            
+            // Map to DTOs while preserving pagination metadata
             return newsPage.map(NewsMapper::toDto);
         } catch (Exception e) {
-            logger.error("Error searching news with term '{}': {}", searchTerm, e.getMessage(), e);
+            logger.error("Error searching news: {}", e.getMessage(), e);
             throw new RuntimeException("Failed to search news: " + e.getMessage());
         }
     }
@@ -390,6 +414,52 @@ public class NewsService {
         
         if (startDate.isAfter(endDate)) {
             throw new IllegalArgumentException("Start date cannot be after end date");
+        }
+    }
+
+    /**
+     * Retrieves news articles that are related to the given news ID based on shared entities
+     */
+    public List<NewsDTO> getRelatedNews(Long newsId, int limit) throws EntityNotFoundException {
+        if (newsId == null) {
+            throw new IllegalArgumentException("News ID cannot be null");
+        }
+        
+        // First, verify the news exists
+        News news = newsRepository.findById(newsId)
+                .orElseThrow(() -> new EntityNotFoundException());
+        
+        try {
+            // Find related news IDs from the knowledge graph
+            List<String> relatedIds = neo4jGraphService.findRelatedNewsIds(newsId.toString(), limit);
+            
+            if (relatedIds.isEmpty()) {
+                return Collections.emptyList();
+            }
+            
+            // Convert string IDs to Long
+            List<Long> relatedNewsIds = relatedIds.stream()
+                .map(Long::parseLong)
+                .collect(Collectors.toList());
+            
+            // Fetch the news articles from the database
+            List<News> relatedNews = newsRepository.findAllById(relatedNewsIds);
+            
+            // Sort by the order from Neo4j (most related first)
+            Map<Long, Integer> orderMap = new HashMap<>();
+            for (int i = 0; i < relatedNewsIds.size(); i++) {
+                orderMap.put(relatedNewsIds.get(i), i);
+            }
+            
+            relatedNews.sort(Comparator.comparing(n -> orderMap.getOrDefault(n.getId(), Integer.MAX_VALUE)));
+            
+            return NewsMapper.toDto(relatedNews);
+        } catch (NumberFormatException e) {
+            logger.error("Error parsing related news IDs: {}", e.getMessage());
+            throw new RuntimeException("Error processing related news IDs");
+        } catch (Exception e) {
+            logger.error("Error retrieving related news: {}", e.getMessage(), e);
+            throw new RuntimeException("Failed to retrieve related news: " + e.getMessage());
         }
     }
 }

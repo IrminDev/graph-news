@@ -16,7 +16,9 @@ import com.github.irmindev.graph_news.model.nlp.NewsProcessingResult;
 import com.github.irmindev.graph_news.model.nlp.Relationship;
 
 import java.util.Map;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -236,5 +238,41 @@ public class Neo4jGraphService {
         }
         
         return stats;
+    }
+
+    public List<String> findRelatedNewsIds(String sourceId, int limit) {
+        try (Session session = neo4jDriver.session()) {
+            String query = 
+                "MATCH (source:News {sourceId: $sourceId}) " +
+                "MATCH (source)<-[:MENTIONED_IN]-(entity:Entity)-[:MENTIONED_IN]->(related:News) " +
+                "WHERE related.sourceId <> $sourceId " +
+                // Weight different entity types differently (e.g., people and organizations more important)
+                "WITH related, " +
+                "   sum(CASE WHEN entity.type IN ['Person', 'Organization'] THEN 2.0 " +
+                "           WHEN entity.type = 'Location' THEN 1.5 " +
+                "           ELSE 1.0 END) as relevanceScore, " +
+                "   count(distinct entity) as sharedEntities " +
+                // Using both the number of entities and their relevance
+                "ORDER BY relevanceScore DESC, sharedEntities DESC " +
+                "LIMIT $limit " +
+                "RETURN related.sourceId as relatedId";
+            
+            Map<String, Object> parameters = new HashMap<>();
+            parameters.put("sourceId", sourceId);
+            parameters.put("limit", limit);
+            
+            Result result = session.run(query, parameters);
+            
+            List<String> relatedIds = new ArrayList<>();
+            while (result.hasNext()) {
+                Record record = result.next();
+                relatedIds.add(record.get("relatedId").asString());
+            }
+            
+            return relatedIds;
+        } catch (Exception e) {
+            logger.error("Error finding related news in Neo4j", e);
+            return new ArrayList<>();
+        }
     }
 }
