@@ -21,14 +21,24 @@ public interface NewsRepository extends JpaRepository<News, Long> {
     // Paginación de noticias por autor
     Page<News> findByAuthor(User author, Pageable pageable);
     
-    // Búsqueda de noticias por título o contenido (usando LIKE para búsqueda parcial)
-    @Query("SELECT n FROM News n WHERE LOWER(n.title) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR LOWER(n.content) LIKE LOWER(CONCAT('%', :searchTerm, '%'))")
-    Page<News> searchByTitleOrContent(@Param("searchTerm") String searchTerm, Pageable pageable);
-    
     // Filtrar noticias por rango de fechas
     List<News> findByCreatedAtBetween(LocalDateTime startDate, LocalDateTime endDate);
     Page<News> findByCreatedAtBetween(LocalDateTime startDate, LocalDateTime endDate, Pageable pageable);
     
     // Obtener las noticias más recientes
     List<News> findAllByOrderByCreatedAtDesc(Pageable pageable);
+
+    @Query(value = "SELECT * FROM news n WHERE " +
+           "to_tsvector('english', n.title) @@ plainto_tsquery('english', :query) OR " +
+           "to_tsvector('english', n.content) @@ plainto_tsquery('english', :query)",
+           countQuery = "SELECT count(*) FROM news n WHERE " +
+           "to_tsvector('english', n.title) @@ plainto_tsquery('english', :query) OR " +
+           "to_tsvector('english', n.content) @@ plainto_tsquery('english', :query)",
+           nativeQuery = true)
+    Page<News> searchByTitleOrContent(@Param("query") String query, Pageable pageable);
+
+    @Query("SELECT n FROM News n WHERE " +
+           "LOWER(n.title) LIKE LOWER(CONCAT('%', :query, '%')) OR " +
+           "LOWER(n.content) LIKE LOWER(CONCAT('%', :query, '%'))")
+    Page<News> searchByTitleOrContentLike(@Param("query") String query, Pageable pageable);
 }

@@ -1,6 +1,8 @@
 package com.github.irmindev.graph_news.model.entity;
 
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
+import java.time.ZoneId;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -34,7 +36,9 @@ public class News {
         this.title = title;
         this.content = content;
         this.author = author;
-        this.createdAt = LocalDateTime.now();
+        // Convertir a la zona horaria de CDMX
+        this.createdAt = ZonedDateTime.now(ZoneId.of("America/Mexico_City"))
+                         .toLocalDateTime();
     }
 
     public Long getId() {

@@ -1,8 +1,9 @@
 package com.github.irmindev.graph_news.service;
 
 import java.io.IOException;
-import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -147,9 +148,9 @@ public class UserService {
         return UserMapper.toDto(user);
     }
 
-    public List<UserDTO> getAllUsers() {
-        List<User> users = userRepository.findAll();
-        return UserMapper.toDto(users.stream().filter(user -> user.getIsActive()).toList());
+    public Page<UserDTO> getAllUsers(Pageable pageable) {
+        Page<User> users = userRepository.findAll(pageable);
+        return users.map(UserMapper::toDto);
     }
 
     public byte[] getImage(Long id) throws EntityNotFoundException {

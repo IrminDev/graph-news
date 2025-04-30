@@ -198,8 +198,8 @@ public class NewsController {
         }
     }
     
-    /**
-     * Busca noticias por texto
+   /**
+     * Search for news articles containing the specified query in title or content
      */
     @GetMapping("/search")
     public ResponseEntity<?> searchNews(
@@ -207,15 +207,26 @@ public class NewsController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
         
-        Pageable pageable = PageRequest.of(page, size);
-        Page<NewsDTO> newsPage = newsService.searchNews(query, pageable);
-        
-        return ResponseEntity.ok(
-            new NewsResponse.SuccessList(
-                newsPage.getContent(),
-                newsPage.getTotalElements()
-            )
-        );
+        try {
+            if (query == null || query.trim().isEmpty()) {
+                return ResponseEntity.badRequest()
+                    .body(new NewsResponse.Failure("Search query cannot be empty"));
+            }
+            
+            Page<NewsDTO> newsPage = newsService.searchNews(query, page, size);
+            
+            // Create response with paginated results
+            List<NewsDTO> newsList = newsPage.getContent();
+            return ResponseEntity.ok(
+                new NewsResponse.SuccessList(
+                    newsList,
+                    newsPage.getTotalElements()
+                )
+            );
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(new NewsResponse.Failure("Error searching news: " + e.getMessage()));
+        }
     }
     
     /**
@@ -287,6 +298,25 @@ public class NewsController {
         } catch (UnallowedMethodException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
                 .body(new NewsResponse.Failure(e.getMessage()));
+        }
+    }
+
+    /**
+     * Gets news articles related to the specified news ID based on shared entities
+     */
+    @GetMapping("/{id}/related")
+    public ResponseEntity<?> getRelatedNews(
+            @PathVariable Long id,
+            @RequestParam(defaultValue = "5") int limit) {
+        try {
+            List<NewsDTO> relatedNews = newsService.getRelatedNews(id, limit);
+            return ResponseEntity.ok(new NewsResponse.SuccessList(relatedNews));
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(new NewsResponse.Failure("News not found"));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(new NewsResponse.Failure("Error retrieving related news: " + e.getMessage()));
         }
     }
 }
