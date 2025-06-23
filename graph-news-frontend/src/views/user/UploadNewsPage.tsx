@@ -173,16 +173,18 @@ const UploadNewsPage: React.FC = () => {
     }
     
     try {
+      let response;
+      
       // Different approach based on upload type
       if (uploadType === "url") {
         // URL-based upload
-        await uploadNewsURL(token, { 
+        response = await uploadNewsURL(token, { 
           title: title,
           url: url 
         });
       } else if (uploadType === "text") {
         // Content-based upload
-        await uploadNewsContent(token, {
+        response = await uploadNewsContent(token, {
           title: title,
           content: content
         });
@@ -200,11 +202,17 @@ const UploadNewsPage: React.FC = () => {
         });
         formData.append("request", blob);
         
-        await uploadNewsFile(token, formData);
+        response = await uploadNewsFile(token, formData);
       }
       
       toast.success("News uploaded successfully! It's now being processed.");
-      navigate("/user/profile");
+      
+      // Redirect to the news detail page instead of profile
+      if (response && response.news && response.news.id) {
+        navigate(`/user/news/${response.news.id}`);
+      } else {
+        navigate("/user/profile");
+      }
     } catch (error: any) {
       toast.error(error.message || "Failed to upload news");
       setSubmitting(false);

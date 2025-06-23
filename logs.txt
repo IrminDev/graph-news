@@ -1,0 +1,661 @@
+RECOGNIZED ENTITIES:
+  trump (Person)
+  2 april (Time)
+  smuggling (Other)
+  american (Other)
+  mexican (Other)
+  crashes (Other)
+  us customs (Organization)
+  drug trafficking (Other)
+  claudia sheinbaum (Person)
+  five months (Other)
+  sheinbaum (Person)
+  50 (Numerical)
+  los angeles (Location)
+  five (Numerical)
+  us (Location)
+  25 % (Numerical)
+  £ 1.16 (Numerical)
+  bbc (Organization)
+  jay (Person)
+  87,000 (Numerical)
+  driver (Other)
+  courier (Other)
+  114,000 (Numerical)
+  $ 5 (Numerical)
+  $ 6 (Numerical)
+  october (Time)
+  cia (Organization)
+  $ 1.50 (Numerical)
+  sinaloa (Location)
+  5,000 (Numerical)
+  100,000 (Numerical)
+  29 (Numerical)
+  united states (Location)
+  two (Numerical)
+  national guard (Organization)
+  december (Time)
+  border protection (Organization)
+  september 2024 (Time)
+  donald trump (Person)
+  overdose (Other)
+  six (Numerical)
+  drugs (Other)
+  one (Numerical)
+  february (Time)
+  war (Other)
+  october 2023 (Time)
+  mexico (Location)
+  white house (Organization)
+  china (Location)
+  la (Location)
+  10,000 (Numerical)
+  dealer (Other)
+  naloxone (Miscellaneous)
+  900 (Numerical)
+  president (Other)
+  charlie (Person)
+Found 3 OpenIE triples in sentence: The fentanyl dealer from Los Angeles stands to the...
+  TRIPLE: fentanyl dealer | stands to | side watching (Confidence: 1.0)
+    Matched to entities: fentanyl dealer | null
+  TRIPLE: fentanyl dealer | stands to | side watching carefully (Confidence: 1.0)
+    Matched to entities: fentanyl dealer | null
+  TRIPLE: fentanyl dealer | stands to | side (Confidence: 1.0)
+    Matched to entities: fentanyl dealer | president
+Found 21 OpenIE triples in sentence: The synthetic opioid drug is wrapped in foil, seal...
+  TRIPLE: synthetic drug | dropped into | petrol tank (Confidence: 1.0)
+    Matched to entities: null | null
+  TRIPLE: synthetic drug | dropped into | petrol tank of trafficker 's car (Confidence: 1.0)
+    Matched to entities: null | null
+  TRIPLE: synthetic drug | dropped with | oily splash (Confidence: 1.0)
+    Matched to entities: null | oily splash
+  TRIPLE: opioid drug | dropped into | petrol tank of trafficker 's car (Confidence: 1.0)
+    Matched to entities: null | null
+  TRIPLE: opioid drug | dropped into | petrol tank of trafficker 's nondescript car (Confidence: 1.0)
+    Matched to entities: null | null
+  TRIPLE: opioid drug | dropped with | splash (Confidence: 1.0)
+    Matched to entities: null | splash
+  TRIPLE: opioid drug | dropped with | oily splash (Confidence: 1.0)
+    Matched to entities: null | oily splash
+  TRIPLE: drug | dropped into | petrol tank of trafficker 's car (Confidence: 1.0)
+    Matched to entities: drug trafficking | null
+  TRIPLE: synthetic opioid drug | dropped into | petrol tank of trafficker 's nondescript car (Confidence: 1.0)
+    Matched to entities: null | null
+  TRIPLE: drug | dropped with | oily splash (Confidence: 1.0)
+    Matched to entities: drug trafficking | oily splash
+  TRIPLE: synthetic drug | dropped with | splash (Confidence: 1.0)
+    Matched to entities: null | splash
+  TRIPLE: synthetic drug | dropped into | petrol tank of trafficker 's nondescript car (Confidence: 1.0)
+    Matched to entities: null | null
+  TRIPLE: synthetic opioid drug | dropped into | petrol tank of trafficker 's car (Confidence: 1.0)
+    Matched to entities: null | null
+  TRIPLE: drug | dropped into | petrol tank of trafficker 's nondescript car (Confidence: 1.0)
+    Matched to entities: drug trafficking | null
+  TRIPLE: drug | dropped into | petrol tank (Confidence: 1.0)
+    Matched to entities: drug trafficking | null
+  TRIPLE: synthetic opioid drug | dropped into | petrol tank (Confidence: 1.0)
+    Matched to entities: null | null
+  TRIPLE: trafficker | of | nondescript car (Confidence: 1.0)
+    Matched to entities: null | null
+  TRIPLE: drug | dropped with | splash (Confidence: 1.0)
+    Matched to entities: drug trafficking | splash
+  TRIPLE: opioid drug | dropped into | petrol tank (Confidence: 1.0)
+    Matched to entities: null | null
+  TRIPLE: synthetic opioid drug | dropped with | splash (Confidence: 1.0)
+    Matched to entities: null | splash
+  TRIPLE: synthetic opioid drug | dropped with | oily splash (Confidence: 1.0)
+    Matched to entities: null | oily splash
+Found 1 OpenIE triples in sentence: Jay, not his real name, had crossed earlier from t...
+  TRIPLE: Jay | name | his (Confidence: 1.0)
+    Matched to entities: jay | null
+Found 0 OpenIE triples in sentence: The house looks like any other in this neighbourho...
+Found 9 OpenIE triples in sentence: We are told to drive in quickly and an iron gate c...
+  TRIPLE: iron gate | closes firmly behind | us (Confidence: 1.0)
+    Matched to entities: null | us
+  TRIPLE: We | are | told (Confidence: 1.0)
+    Matched to entities: null | null
+  TRIPLE: We | are told | drive quickly (Confidence: 1.0)
+    Matched to entities: null | null
+  TRIPLE: We | are told | to drive in quickly (Confidence: 1.0)
+    Matched to entities: null | null
+  TRIPLE: We | are told | drive (Confidence: 1.0)
+    Matched to entities: null | driver
+  TRIPLE: iron gate | closes behind | us (Confidence: 1.0)
+    Matched to entities: null | us
+  TRIPLE: We | are told | to drive quickly (Confidence: 1.0)
+    Matched to entities: null | null
+  TRIPLE: We | are told | drive in quickly (Confidence: 1.0)
+    Matched to entities: null | null
+  TRIPLE: We | are told | to drive (Confidence: 1.0)
+    Matched to entities: null | null
+Found 0 OpenIE triples in sentence: They don't cook the drug here, but still they are ...
+Found 4 OpenIE triples in sentence: The men all speak in hushed voices and work quickl...
+  TRIPLE: men | speak in | voices (Confidence: 1.0)
+    Matched to entities: null | null
+  TRIPLE: men | all speak in | voices (Confidence: 1.0)
+    Matched to entities: null | null
+  TRIPLE: men | all speak in | hushed voices (Confidence: 1.0)
+    Matched to entities: null | hushed voices
+  TRIPLE: men | speak in | hushed voices (Confidence: 1.0)
+    Matched to entities: null | hushed voices
+Found 18 OpenIE triples in sentence: Their lethal business has become the centre of a g...
+  TRIPLE: Their business | has become | centre of economic dispute (Confidence: 1.0)
+    Matched to entities: Their business | null
+  TRIPLE: Their business | centre of | dispute (Confidence: 1.0)
+    Matched to entities: Their business | null
+  TRIPLE: Their business | has become | centre of global economic dispute (Confidence: 1.0)
+    Matched to entities: Their business | null
+  TRIPLE: Their lethal business | has become | centre of global dispute (Confidence: 1.0)
+    Matched to entities: Their lethal business | null
+  TRIPLE: Their business | centre of | global dispute (Confidence: 1.0)
+    Matched to entities: Their business | null
+  TRIPLE: Their business | centre of | global economic dispute (Confidence: 1.0)
+    Matched to entities: Their business | null
+  TRIPLE: Their lethal business | centre of | global economic dispute (Confidence: 1.0)
+    Matched to entities: Their lethal business | null
+  TRIPLE: Their business | has become | centre of global dispute (Confidence: 1.0)
+    Matched to entities: Their business | null
+  TRIPLE: Their lethal business | has become | centre of global economic dispute (Confidence: 1.0)
+    Matched to entities: Their lethal business | null
+  TRIPLE: Their lethal business | has become | centre of economic dispute (Confidence: 1.0)
+    Matched to entities: Their lethal business | null
+  TRIPLE: Their lethal business | has become | centre (Confidence: 1.0)
+    Matched to entities: Their lethal business | null
+  TRIPLE: Their business | has become | centre (Confidence: 1.0)
+    Matched to entities: Their business | null
+  TRIPLE: Their lethal business | centre of | economic dispute (Confidence: 1.0)
+    Matched to entities: Their lethal business | null
+  TRIPLE: Their lethal business | has become | centre of dispute (Confidence: 1.0)
+    Matched to entities: Their lethal business | null
+  TRIPLE: Their business | has become | centre of dispute (Confidence: 1.0)
+    Matched to entities: Their business | null
+  TRIPLE: Their lethal business | centre of | global dispute (Confidence: 1.0)
+    Matched to entities: Their lethal business | null
+  TRIPLE: Their lethal business | centre of | dispute (Confidence: 1.0)
+    Matched to entities: Their lethal business | null
+  TRIPLE: Their business | centre of | economic dispute (Confidence: 1.0)
+    Matched to entities: Their business | null
+Found 3 OpenIE triples in sentence: The White House has used fentanyl smuggling throug...
+  TRIPLE: White House | has used through | US borders (Confidence: 0.08525081604622908)
+    Matched to entities: white house | US borders
+  TRIPLE: White House | has used | fentanyl smuggling (Confidence: 1.0)
+    Matched to entities: white house | fentanyl smuggling
+  TRIPLE: White House | has used fentanyl smuggling through | US borders (Confidence: 1.0)
+    Matched to entities: white house | US borders
+Found 3 OpenIE triples in sentence: US President Donald Trump has also vowed to "wage ...
+  TRIPLE: Donald Trump | is | President (Confidence: 1.0)
+    Matched to entities: donald trump | president
+  TRIPLE: US President Donald Trump | wage war on | drug cartels (Confidence: 1.0)
+    Matched to entities: US President Donald Trump | null
+  TRIPLE: US President Donald Trump | wage | war (Confidence: 1.0)
+    Matched to entities: US President Donald Trump | war
+Found 18 OpenIE triples in sentence: The BBC gained rare access to a cartel's operation...
+  TRIPLE: international row | halt | flow of narcotics (Confidence: 1.0)
+    Matched to entities: null | null
+  TRIPLE: international row | halt | illegal flow of narcotics (Confidence: 1.0)
+    Matched to entities: null | null
+  TRIPLE: row | halt | flow of narcotics (Confidence: 1.0)
+    Matched to entities: null | null
+  TRIPLE: row | halt | illegal flow (Confidence: 1.0)
+    Matched to entities: null | null
+  TRIPLE: BBC | gained | rare access (Confidence: 1.0)
+    Matched to entities: bbc | null
+  TRIPLE: BBC | travelled to | US (Confidence: 1.0)
+    Matched to entities: bbc | us
+  TRIPLE: row | halt | illegal flow of narcotics (Confidence: 1.0)
+    Matched to entities: null | null
+  TRIPLE: international row | halt | flow (Confidence: 1.0)
+    Matched to entities: null | null
+  TRIPLE: BBC | gained access to | cartel 's operation (Confidence: 1.0)
+    Matched to entities: bbc | null
+  TRIPLE: cartel | to | operation along border (Confidence: 1.0)
+    Matched to entities: null | null
+  TRIPLE: BBC | travelled | to see (Confidence: 1.0)
+    Matched to entities: bbc | null
+  TRIPLE: row | was doing | anything (Confidence: 1.0)
+    Matched to entities: null | null
+  TRIPLE: BBC | gained access to | cartel 's operation along border (Confidence: 1.0)
+    Matched to entities: bbc | null
+  TRIPLE: BBC | gained | access (Confidence: 1.0)
+    Matched to entities: bbc | null
+  TRIPLE: BBC | travelled | see (Confidence: 1.0)
+    Matched to entities: bbc | null
+  TRIPLE: international row | was doing | anything (Confidence: 1.0)
+    Matched to entities: null | null
+  TRIPLE: row | halt | flow (Confidence: 1.0)
+    Matched to entities: null | null
+  TRIPLE: international row | halt | illegal flow (Confidence: 1.0)
+    Matched to entities: null | null
+Found 6 OpenIE triples in sentence: The men we meet at the safe house are foot-soldier...
+  TRIPLE: men | are | foot soldiers of cartel (Confidence: 1.0)
+    Matched to entities: null | null
+  TRIPLE: we | meet at | safe house (Confidence: 1.0)
+    Matched to entities: null | safe house
+  TRIPLE: men | are | foot soldiers of well known cartel (Confidence: 1.0)
+    Matched to entities: null | null
+  TRIPLE: men | are | foot soldiers of known cartel (Confidence: 1.0)
+    Matched to entities: null | null
+  TRIPLE: men | are | foot soldiers (Confidence: 1.0)
+    Matched to entities: null | null
+  TRIPLE: we | meet at | house (Confidence: 1.0)
+    Matched to entities: null | house
+Found 0 OpenIE triples in sentence: Two of them loading the car admit to fleeting mome...
+Found 7 OpenIE triples in sentence: But when I ask the man packing the drugs into the ...
+  TRIPLE: man | packing drugs into | fuel tank (Confidence: 1.0)
+    Matched to entities: null | null
+  TRIPLE: he | feels | guilty (Confidence: 1.0)
+    Matched to entities: crashes | null
+  TRIPLE: man | packing | drugs (Confidence: 1.0)
+    Matched to entities: null | drugs
+  TRIPLE: I | ask man | he feels (Confidence: 1.0)
+    Matched to entities: 2 april | null
+  TRIPLE: I | ask | man (Confidence: 1.0)
+    Matched to entities: 2 april | null
+  TRIPLE: I | ask man | if he feels (Confidence: 1.0)
+    Matched to entities: 2 april | null
+  TRIPLE: he | feels | guilty about deaths (Confidence: 1.0)
+    Matched to entities: crashes | null
+Found 5 OpenIE triples in sentence: "We have family too, of course we feel guilty....
+  TRIPLE: We | have | family (Confidence: 1.0)
+    Matched to entities: null | null
+  TRIPLE: we | feel | guilty (Confidence: 1.0)
+    Matched to entities: null | null
+  TRIPLE: We | have too | family (Confidence: 1.0)
+    Matched to entities: null | null
+  TRIPLE: We | have family of | course (Confidence: 1.0)
+    Matched to entities: null | null
+  TRIPLE: We | have family too of | course (Confidence: 1.0)
+    Matched to entities: null | null
+Found 4 OpenIE triples in sentence: But if I stop, it's going to continue....
+  TRIPLE: it | 's going | if I stop (Confidence: 1.0)
+    Matched to entities: united states | null
+  TRIPLE: it | 's going | continue (Confidence: 1.0)
+    Matched to entities: united states | null
+  TRIPLE: it | 's going | I stop (Confidence: 1.0)
+    Matched to entities: united states | null
+  TRIPLE: it | 's going | to continue (Confidence: 1.0)
+    Matched to entities: united states | null
+Found 0 OpenIE triples in sentence: It's not my problem," he tells me with a shrug....
+Found 2 OpenIE triples in sentence: The men keep their faces covered while they remove...
+  TRIPLE: men | keep | their faces covered (Confidence: 1.0)
+    Matched to entities: null | null
+  TRIPLE: men | keep | their faces (Confidence: 1.0)
+    Matched to entities: null | null
+Found 8 OpenIE triples in sentence: The smell inside the car could alert customs offic...
+  TRIPLE: smell | could alert customs officers on | side (Confidence: 1.0)
+    Matched to entities: null | president
+  TRIPLE: smell | could alert | customs officers (Confidence: 1.0)
+    Matched to entities: null | customs officers
+  TRIPLE: fuel tank | been | tampered (Confidence: 1.0)
+    Matched to entities: null | null
+  TRIPLE: customs officers | smell inside | car (Confidence: 0.3333333333333333)
+    Matched to entities: customs officers | null
+  TRIPLE: fuel tank | been | tampered with (Confidence: 1.0)
+    Matched to entities: null | null
+  TRIPLE: smell | could alert customs officers on | other side of border (Confidence: 1.0)
+    Matched to entities: null | null
+  TRIPLE: smell | could alert customs officers on | side of border (Confidence: 1.0)
+    Matched to entities: null | null
+  TRIPLE: smell | could alert customs officers on | other side (Confidence: 1.0)
+    Matched to entities: null | null
+Found 6 OpenIE triples in sentence: The light green pills, 5,000 in total and marked w...
+  TRIPLE: light green pills | 5,000 with | M (Confidence: 1.0)
+    Matched to entities: null | trump
+  TRIPLE: light green pills | are | packed (Confidence: 1.0)
+    Matched to entities: null | null
+  TRIPLE: green pills | are | packed (Confidence: 1.0)
+    Matched to entities: null | null
+  TRIPLE: pills | are | packed (Confidence: 1.0)
+    Matched to entities: null | null
+  TRIPLE: light green pills | 5,000 in | total (Confidence: 1.0)
+    Matched to entities: null | null
+  TRIPLE: light pills | are | packed (Confidence: 1.0)
+    Matched to entities: null | null
+Found 2 OpenIE triples in sentence: "I try to get 100,000 pills a week, every week," t...
+  TRIPLE: dealer | tells | me (Confidence: 1.0)
+    Matched to entities: dealer | american
+  TRIPLE: spoken dealer | tells | me (Confidence: 1.0)
+    Matched to entities: spoken dealer | american
+Found 0 OpenIE triples in sentence: "I don't send them in one vehicle....
+Found 1 OpenIE triples in sentence: I try to spread it in different cars....
+  TRIPLE: I | spread | it (Confidence: 1.0)
+    Matched to entities: 2 april | united states
+Found 0 OpenIE triples in sentence: That way I minimise my risk of losing all my pills...
+Found 9 OpenIE triples in sentence: "
+A 25% tariff on all goods from Mexico was introd...
+  TRIPLE: Donald Trump | is | President (Confidence: 1.0)
+    Matched to entities: donald trump | president
+  TRIPLE: % tariff | was introduced | to President Donald Trump said (Confidence: 0.633593924617174)
+    Matched to entities: null | to President Donald Trump said
+  TRIPLE: % tariff | was introduced in | response (Confidence: 1.0)
+    Matched to entities: null | null
+  TRIPLE: 25 % tariff | was introduced | to President Donald Trump said (Confidence: 0.633593924617174)
+    Matched to entities: 25 % tariff | to President Donald Trump said
+  TRIPLE: 25 % tariff | was introduced | President Donald Trump said (Confidence: 0.633593924617174)
+    Matched to entities: 25 % tariff | President Donald Trump said
+  TRIPLE: 25 % tariff | was introduced in | response (Confidence: 1.0)
+    Matched to entities: 25 % tariff | null
+  TRIPLE: 25 % tariff | was | introduced (Confidence: 1.0)
+    Matched to entities: 25 % tariff | null
+  TRIPLE: % tariff | was introduced | President Donald Trump said (Confidence: 0.633593924617174)
+    Matched to entities: null | President Donald Trump said
+  TRIPLE: % tariff | was | introduced (Confidence: 1.0)
+    Matched to entities: null | null
+Found 0 OpenIE triples in sentence: Some of those tariffs have since been delayed unti...
+Found 2 OpenIE triples in sentence: Defeating the fentanyl trade is one of President T...
+  TRIPLE: Trump | of | top policy goals (Confidence: 1.0)
+    Matched to entities: trump | null
+  TRIPLE: Trump | is 's | President (Confidence: 1.0)
+    Matched to entities: trump | president
+Found 4 OpenIE triples in sentence: "Last time he was in office, he tried to do the sa...
+  TRIPLE: he | was in | Last time office (Confidence: 1.0)
+    Matched to entities: crashes | Last time office
+  TRIPLE: he | do | same thing (Confidence: 1.0)
+    Matched to entities: crashes | null
+  TRIPLE: he | was in | time office (Confidence: 1.0)
+    Matched to entities: crashes | null
+  TRIPLE: he | do | thing (Confidence: 1.0)
+    Matched to entities: crashes | null
+Found 0 OpenIE triples in sentence: There's always going to be a demand....
+Found 0 OpenIE triples in sentence: And where's the biggest demand?...
+Found 0 OpenIE triples in sentence: United States, lucky for us....
+Found 1 OpenIE triples in sentence: We're here in the border," says Jay with a smile....
+  TRIPLE: Jay | is with | smile (Confidence: 1.0)
+    Matched to entities: jay | null
+Found 4 OpenIE triples in sentence: There is so much of the drug flowing into the US, ...
+  TRIPLE: $ 1.50 | to drug is | most of it coming from Mexico (Confidence: 1.0)
+    Matched to entities: $ 1.50 | most of it coming from Mexico
+  TRIPLE: it | coming from | Mexico (Confidence: 0.7568710070737775)
+    Matched to entities: united states | mexico
+  TRIPLE: $ 1.50 | to drug is | that (Confidence: 1.0)
+    Matched to entities: $ 1.50 | null
+  TRIPLE: he | sells | it (Confidence: 1.0)
+    Matched to entities: crashes | united states
+Found 26 OpenIE triples in sentence: Mexican police say cartels switched in a big way t...
+  TRIPLE: it | is | because completely synthetic (Confidence: 1.0)
+    Matched to entities: united states | because completely synthetic
+  TRIPLE: it | is completely synthetic unlike | other opiates (Confidence: 1.0)
+    Matched to entities: united states | null
+  TRIPLE: Mexican police | say | cartels switched in big way (Confidence: 1.0)
+    Matched to entities: Mexican police | null
+  TRIPLE: Mexican police | say | cartels switched in way to fentanyl (Confidence: 1.0)
+    Matched to entities: Mexican police | null
+  TRIPLE: police | say | cartels switched in way to fentanyl (Confidence: 1.0)
+    Matched to entities: null | null
+  TRIPLE: it | is | synthetic (Confidence: 1.0)
+    Matched to entities: united states | null
+  TRIPLE: it | is | because unlike opiates completely synthetic (Confidence: 1.0)
+    Matched to entities: united states | because unlike opiates completely synthetic
+  TRIPLE: it | is | because unlike opiates synthetic (Confidence: 1.0)
+    Matched to entities: united states | because unlike opiates synthetic
+  TRIPLE: Mexican police | say | cartels switched to fentanyl (Confidence: 1.0)
+    Matched to entities: Mexican police | null
+  TRIPLE: it | is completely synthetic unlike | opiates (Confidence: 1.0)
+    Matched to entities: united states | null
+  TRIPLE: police | say | cartels switched (Confidence: 1.0)
+    Matched to entities: null | null
+  TRIPLE: Mexican police | say | cartels switched in big way to fentanyl (Confidence: 1.0)
+    Matched to entities: Mexican police | null
+  TRIPLE: Mexican police | say | cartels switched in way (Confidence: 1.0)
+    Matched to entities: Mexican police | null
+  TRIPLE: police | say | cartels switched in big way (Confidence: 1.0)
+    Matched to entities: null | null
+  TRIPLE: it | is | because unlike other opiates completely synthetic (Confidence: 1.0)
+    Matched to entities: united states | because unlike other opiates completely synthetic
+  TRIPLE: police | say | cartels switched in way (Confidence: 1.0)
+    Matched to entities: null | null
+  TRIPLE: it | is | completely synthetic (Confidence: 1.0)
+    Matched to entities: united states | null
+  TRIPLE: Mexican police | say | cartels switched (Confidence: 1.0)
+    Matched to entities: Mexican police | null
+  TRIPLE: it | is synthetic unlike | opiates (Confidence: 1.0)
+    Matched to entities: united states | null
+  TRIPLE: it | is | because unlike other opiates synthetic (Confidence: 1.0)
+    Matched to entities: united states | because unlike other opiates synthetic
+  TRIPLE: it | is synthetic unlike | other opiates (Confidence: 1.0)
+    Matched to entities: united states | null
+  TRIPLE: police | say | cartels switched in big way to fentanyl (Confidence: 1.0)
+    Matched to entities: null | null
+  TRIPLE: police | say | cartels switched to fentanyl (Confidence: 1.0)
+    Matched to entities: null | null
+  TRIPLE: police | say | cartels (Confidence: 1.0)
+    Matched to entities: null | null
+  TRIPLE: Mexican police | say | cartels (Confidence: 1.0)
+    Matched to entities: Mexican police | null
+  TRIPLE: it | is | because synthetic (Confidence: 1.0)
+    Matched to entities: united states | because synthetic
+Found 14 OpenIE triples in sentence: Fentanyl's strength and addictiveness has left a d...
+  TRIPLE: Fentanyl 's strength | has left | deep scar (Confidence: 1.0)
+    Matched to entities: null | null
+  TRIPLE: addictiveness | has left | deep scar (Confidence: 1.0)
+    Matched to entities: null | null
+  TRIPLE: drug overdoses | kill | people in US (Confidence: 1.0)
+    Matched to entities: drug overdoses | people in US
+  TRIPLE: addictiveness | has left | scar (Confidence: 1.0)
+    Matched to entities: null | null
+  TRIPLE: drug overdoses | kill | more people in US (Confidence: 1.0)
+    Matched to entities: drug overdoses | more people in US
+  TRIPLE: Fentanyl 's strength | has left scar on | American society (Confidence: 1.0)
+    Matched to entities: null | American society
+  TRIPLE: Fentanyl 's strength | has left | scar (Confidence: 1.0)
+    Matched to entities: null | null
+  TRIPLE: Fentanyl | has | strength (Confidence: 1.0)
+    Matched to entities: null | null
+  TRIPLE: drug overdoses | more people in | US (Confidence: 0.5682755600847088)
+    Matched to entities: drug overdoses | us
+  TRIPLE: drug overdoses | people in | US (Confidence: 0.5682755600847088)
+    Matched to entities: drug overdoses | us
+  TRIPLE: more people | is in | US (Confidence: 1.0)
+    Matched to entities: null | us
+  TRIPLE: Fentanyl 's strength | has left scar on | society (Confidence: 1.0)
+    Matched to entities: null | null
+  TRIPLE: addictiveness | has left scar on | American society (Confidence: 1.0)
+    Matched to entities: null | American society
+  TRIPLE: addictiveness | has left scar on | society (Confidence: 1.0)
+    Matched to entities: null | null
+Found 14 OpenIE triples in sentence: Fatalities have started to decline, perhaps due in...
+  TRIPLE: Fatalities | have started | decline (Confidence: 1.0)
+    Matched to entities: null | null
+  TRIPLE: Fatalities | have started due | due part to availability (Confidence: 1.0)
+    Matched to entities: null | due part to availability
+  TRIPLE: Fatalities | have started due | due part to availability of Naloxone (Confidence: 1.0)
+    Matched to entities: null | due part to availability of Naloxone
+  TRIPLE: Fatalities | have started due | due part to greater availability of Naloxone (Confidence: 1.0)
+    Matched to entities: null | due part to greater availability of Naloxone
+  TRIPLE: Fatalities | have started due | perhaps due part to greater availability (Confidence: 1.0)
+    Matched to entities: null | perhaps due part to greater availability
+  TRIPLE: Fatalities | have started due | perhaps due part to availability (Confidence: 1.0)
+    Matched to entities: null | perhaps due part to availability
+  TRIPLE: Fatalities | have started due | due part to greater availability (Confidence: 1.0)
+    Matched to entities: null | due part to greater availability
+  TRIPLE: Fatalities | have started due | due part (Confidence: 1.0)
+    Matched to entities: null | null
+  TRIPLE: greater availability | to part is | drug (Confidence: 1.0)
+    Matched to entities: greater availability | drug trafficking
+  TRIPLE: Fatalities | have started due | perhaps due part to greater availability of Naloxone (Confidence: 1.0)
+    Matched to entities: null | perhaps due part to greater availability of Naloxone
+  TRIPLE: Fatalities | have started | to decline (Confidence: 1.0)
+    Matched to entities: null | null
+  TRIPLE: Fatalities | have started due | perhaps due part to availability of Naloxone (Confidence: 1.0)
+    Matched to entities: null | perhaps due part to availability of Naloxone
+  TRIPLE: Fatalities | have started due | perhaps due part (Confidence: 1.0)
+    Matched to entities: null | null
+  TRIPLE: Fatalities | have started due | drug (Confidence: 1.0)
+    Matched to entities: null | drug trafficking
+Found 4 OpenIE triples in sentence: But the latest figures are still stark: 87,000 ove...
+  TRIPLE: figures | are | stark (Confidence: 1.0)
+    Matched to entities: null | null
+  TRIPLE: latest figures | are | stark (Confidence: 1.0)
+    Matched to entities: latest figures | null
+  TRIPLE: figures | are | still stark (Confidence: 1.0)
+    Matched to entities: null | null
+  TRIPLE: latest figures | are | still stark (Confidence: 1.0)
+    Matched to entities: latest figures | null
+Found 2 OpenIE triples in sentence: In an attempt to stave off punitive tariffs from t...
+  TRIPLE: Mexican President Claudia Sheinbaum | send | 10,000 National Guard troops (Confidence: 1.0)
+    Matched to entities: Mexican President Claudia Sheinbaum | 10,000 National Guard troops
+  TRIPLE: Claudia Sheinbaum | is | President (Confidence: 1.0)
+    Matched to entities: claudia sheinbaum | president
+Found 0 OpenIE triples in sentence: The government has made more than 900 arrests sinc...
+Found 1 OpenIE triples in sentence: Back in December, Mexico announced its biggest eve...
+  TRIPLE: fentanyl seizure | is in | state (Confidence: 1.0)
+    Matched to entities: null | united states
+Found 12 OpenIE triples in sentence: In fact, the country has seized more fentanyl in t...
+  TRIPLE: it | did in | year (Confidence: 1.0)
+    Matched to entities: united states | null
+  TRIPLE: country | has seized fentanyl | it did (Confidence: 1.0)
+    Matched to entities: null | null
+  TRIPLE: country | has seized fentanyl | than it did (Confidence: 1.0)
+    Matched to entities: null | null
+  TRIPLE: country | has seized | more fentanyl (Confidence: 1.0)
+    Matched to entities: null | null
+  TRIPLE: country | has seized fentanyl in | past five months (Confidence: 1.0)
+    Matched to entities: null | past five months
+  TRIPLE: country | has seized fentanyl | it did in previous year (Confidence: 1.0)
+    Matched to entities: null | it did in previous year
+  TRIPLE: country | has seized | fentanyl (Confidence: 1.0)
+    Matched to entities: null | null
+  TRIPLE: country | has seized fentanyl | than it did in previous year (Confidence: 1.0)
+    Matched to entities: null | than it did in previous year
+  TRIPLE: it | did in | previous year (Confidence: 1.0)
+    Matched to entities: united states | previous year
+  TRIPLE: country | has seized fentanyl | than it did in year (Confidence: 1.0)
+    Matched to entities: null | null
+  TRIPLE: country | has seized fentanyl | it did in year (Confidence: 1.0)
+    Matched to entities: null | null
+  TRIPLE: country | has seized fentanyl In | fact (Confidence: 1.0)
+    Matched to entities: null | null
+Found 10 OpenIE triples in sentence: Mexico has also made it harder to import a key ing...
+  TRIPLE: Mexico | import | ingredient (Confidence: 1.0)
+    Matched to entities: mexico | null
+  TRIPLE: Mexico | has also made | it (Confidence: 1.0)
+    Matched to entities: mexico | united states
+  TRIPLE: Mexico | import | ingredient of fentanyl (Confidence: 1.0)
+    Matched to entities: mexico | null
+  TRIPLE: Mexico | has also made harder | it (Confidence: 1.0)
+    Matched to entities: mexico | united states
+  TRIPLE: strength | is in | process (Confidence: 1.0)
+    Matched to entities: null | null
+  TRIPLE: Mexico | has made | it (Confidence: 1.0)
+    Matched to entities: mexico | united states
+  TRIPLE: Mexico | has made harder | it (Confidence: 1.0)
+    Matched to entities: mexico | united states
+  TRIPLE: Mexico | import | key ingredient (Confidence: 1.0)
+    Matched to entities: mexico | null
+  TRIPLE: Mexico | import | key ingredient of fentanyl (Confidence: 1.0)
+    Matched to entities: mexico | null
+  TRIPLE: Mexico | import ingredient from | China (Confidence: 1.0)
+    Matched to entities: mexico | china
+Found 10 OpenIE triples in sentence: And at the end of February, 29 senior drug cartel ...
+  TRIPLE: 29 senior drug cartel figures | were handed over at | end of February (Confidence: 1.0)
+    Matched to entities: 29 senior drug cartel figures | end of February
+  TRIPLE: senior drug cartel figures | were handed over at | end (Confidence: 1.0)
+    Matched to entities: null | null
+  TRIPLE: senior drug cartel figures | were handed over to | United States (Confidence: 1.0)
+    Matched to entities: null | united states
+  TRIPLE: 29 senior drug cartel figures | were handed over including | members (Confidence: 1.0)
+    Matched to entities: 29 senior drug cartel figures | null
+  TRIPLE: senior drug cartel figures | were handed over including | members (Confidence: 1.0)
+    Matched to entities: null | null
+  TRIPLE: 29 senior drug cartel figures | were handed over at | end (Confidence: 1.0)
+    Matched to entities: 29 senior drug cartel figures | null
+  TRIPLE: 29 senior drug cartel figures | were handed over to | United States (Confidence: 1.0)
+    Matched to entities: 29 senior drug cartel figures | united states
+  TRIPLE: Trump | has | administration (Confidence: 1.0)
+    Matched to entities: trump | null
+  TRIPLE: Trump | is 's | President (Confidence: 1.0)
+    Matched to entities: trump | president
+  TRIPLE: senior drug cartel figures | were handed over at | end of February (Confidence: 1.0)
+    Matched to entities: null | end of February
+Found 2 OpenIE triples in sentence: President Sheinbaum also said she had agreed to th...
+  TRIPLE: Sheinbaum | is | President (Confidence: 1.0)
+    Matched to entities: sheinbaum | president
+  TRIPLE: Mexican territory | is in | search of fentanyl drugs (Confidence: 1.0)
+    Matched to entities: Mexican territory | search of fentanyl drugs
+Found 0 OpenIE triples in sentence: Jay acknowledges the dangers of his trade to himse...
+Found 2 OpenIE triples in sentence: "They always try to blame us, that we are the ones...
+  TRIPLE: They | blame | us (Confidence: 1.0)
+    Matched to entities: null | us
+  TRIPLE: we | are | ones (Confidence: 1.0)
+    Matched to entities: null | ones
+Found 2 OpenIE triples in sentence: But they're the biggest users....
+  TRIPLE: they | 're | users (Confidence: 1.0)
+    Matched to entities: null | users
+  TRIPLE: they | 're | biggest users (Confidence: 1.0)
+    Matched to entities: null | biggest users
+Found 2 OpenIE triples in sentence: "
+He coolly insulates himself from responsibility ...
+  TRIPLE: He | insulates | himself (Confidence: 1.0)
+    Matched to entities: crashes | null
+  TRIPLE: He | coolly insulates | himself (Confidence: 1.0)
+    Matched to entities: crashes | null
+Found 0 OpenIE triples in sentence: He claims not to know anyone who has died using hi...
+Found 5 OpenIE triples in sentence: "I only deal with other suppliers," he tells me....
+  TRIPLE: I | only deal with | other suppliers (Confidence: 1.0)
+    Matched to entities: 2 april | null
+  TRIPLE: I | deal with | other suppliers (Confidence: 1.0)
+    Matched to entities: 2 april | null
+  TRIPLE: he | tells | me (Confidence: 1.0)
+    Matched to entities: crashes | american
+  TRIPLE: I | deal with | suppliers (Confidence: 1.0)
+    Matched to entities: 2 april | null
+  TRIPLE: I | only deal with | suppliers (Confidence: 1.0)
+    Matched to entities: 2 april | null
+Found 16 OpenIE triples in sentence: The cartels mostly use American citizens to courie...
+  TRIPLE: cartels | mostly use | American citizens (Confidence: 1.0)
+    Matched to entities: null | American citizens
+  TRIPLE: cartels | mostly use citizens | as likely (Confidence: 1.0)
+    Matched to entities: null | null
+  TRIPLE: cartels | use | American citizens (Confidence: 1.0)
+    Matched to entities: null | American citizens
+  TRIPLE: cartels | mostly use citizens | less likely (Confidence: 1.0)
+    Matched to entities: null | null
+  TRIPLE: cartels | use citizens | less likely (Confidence: 1.0)
+    Matched to entities: null | null
+  TRIPLE: cartels | mostly use citizens to | courier (Confidence: 1.0)
+    Matched to entities: null | courier
+  TRIPLE: cartels | mostly use citizens across | border (Confidence: 1.0)
+    Matched to entities: null | border protection
+  TRIPLE: cartels | use citizens | as likely (Confidence: 1.0)
+    Matched to entities: null | null
+  TRIPLE: cartels | use citizens across | border (Confidence: 1.0)
+    Matched to entities: null | border protection
+  TRIPLE: cartels | use citizens to | courier (Confidence: 1.0)
+    Matched to entities: null | courier
+  TRIPLE: cartels | mostly use | citizens (Confidence: 1.0)
+    Matched to entities: null | null
+  TRIPLE: cartels | mostly use citizens | as less likely (Confidence: 1.0)
+    Matched to entities: null | null
+  TRIPLE: cartels | use citizens | likely (Confidence: 1.0)
+    Matched to entities: null | null
+  TRIPLE: cartels | use | citizens (Confidence: 1.0)
+    Matched to entities: null | null
+  TRIPLE: cartels | mostly use citizens | likely (Confidence: 1.0)
+    Matched to entities: null | null
+  TRIPLE: cartels | use citizens | as less likely (Confidence: 1.0)
+    Matched to entities: null | null
+Found 3 OpenIE triples in sentence: The driver, who goes by the name Charlie, has a US...
+  TRIPLE: US passport | driver | goes (Confidence: 0.3333333333333333)
+    Matched to entities: US passport | null
+  TRIPLE: driver | has | US passport (Confidence: 1.0)
+    Matched to entities: driver | US passport
+  TRIPLE: US passport | driver | goes by name Charlie (Confidence: 0.3333333333333333)
+    Matched to entities: US passport | goes by name Charlie
+Found 4 OpenIE triples in sentence: He, too, is mostly indifferent to the suffering th...
+  TRIPLE: He | is | too mostly indifferent (Confidence: 1.0)
+    Matched to entities: crashes | null
+  TRIPLE: He | is | indifferent (Confidence: 1.0)
+    Matched to entities: crashes | null
+  TRIPLE: He | is | mostly indifferent (Confidence: 1.0)
+    Matched to entities: crashes | null
+  TRIPLE: He | is | too indifferent (Confidence: 1.0)
+    Matched to entities: crashes | null
+Found 0 OpenIE triples in sentence: "I need the money," he says....
+Found 1 OpenIE triples in sentence: When I ask him how many times he has made the drug...
+  TRIPLE: I | ask | him (Confidence: 1.0)
+    Matched to entities: 2 april | null
+Found 2 OpenIE triples in sentence: (I later learn that the 5,000 pills in the fuel ta...
+  TRIPLE: it | pills in | fuel tank (Confidence: 0.3333333333333333)
+    Matched to entities: united states | null
+  TRIPLE: 5,000 pills | is in | fuel tank (Confidence: 1.0)
+    Matched to entities: 5,000 pills | null

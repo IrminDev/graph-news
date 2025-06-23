@@ -38,6 +38,7 @@ async function getAllUsers(token: string): Promise<ListUserResponse> {
                 Authorization: `Bearer ${token}`
             }
         });
+        console.log(response.data);
         return response.data;
     } catch (error) {
         if (axios.isAxiosError(error) && error.response) {

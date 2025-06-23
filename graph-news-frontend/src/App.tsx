@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Search, Network, Brain, Newspaper, Zap, GitBranch, Lock, Globe, Moon, Sun } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import userService from "./services/user.service";
 import User from "./model/User";
 import GetUserResponse from "./model/response/user/GetUserResponse";
@@ -266,29 +266,47 @@ const Navbar: React.FC<{user: User | null, darkMode: boolean, toggleTheme: () =>
   </nav>
 );
 
-const SearchBar: React.FC<{darkMode: boolean}> = ({darkMode}) => (
-  <motion.div
-    initial={{ opacity: 0, y: 20 }}
-    animate={{ opacity: 1, y: 0 }}
-    transition={{ duration: 0.7, delay: 0.9 }}
-    className={`flex items-center w-full backdrop-blur-sm border rounded-full p-2 shadow-xl transition-all duration-500 ${
-      darkMode 
-        ? 'bg-slate-800/50 border-slate-700 shadow-indigo-500/10' 
-        : 'bg-white/80 border-indigo-100  shadow-blue-300/20'
-    }`}
-  >
-    <Input 
-      type="text" 
-      placeholder="Search knowledge graphs..." 
-      className={`flex-grow bg-transparent border-none focus:ring-indigo-500 ${
-        darkMode ? 'text-white placeholder-slate-500' : 'text-slate-800 placeholder-slate-700'
+const SearchBar: React.FC<{darkMode: boolean}> = ({darkMode}) => {
+  const navigate = useNavigate();
+  const [query, setQuery] = useState("");
+  
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (query.trim()) {
+      navigate(`/search?q=${encodeURIComponent(query.trim())}`);
+    }
+  };
+
+  return (
+    <motion.form
+      onSubmit={handleSearch}
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.7, delay: 0.9 }}
+      className={`flex items-center w-full backdrop-blur-sm border rounded-full p-2 shadow-xl transition-all duration-500 ${
+        darkMode 
+          ? 'bg-slate-800/50 border-slate-700 shadow-indigo-500/10' 
+          : 'bg-white/80 border-indigo-100  shadow-blue-300/20'
       }`}
-    />
-    <Button className="bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 text-white p-3 rounded-full">
-      <Search className="w-5 h-5" />
-    </Button>
-  </motion.div>
-);
+    >
+      <Input 
+        type="text" 
+        value={query}
+        onChange={(e) => setQuery(e.target.value)}
+        placeholder="Search knowledge graphs..." 
+        className={`flex-grow bg-transparent border-none focus:ring-indigo-500 ${
+          darkMode ? 'text-white placeholder-slate-500' : 'text-slate-800 placeholder-slate-700'
+        }`}
+      />
+      <Button 
+        type="submit"
+        className="bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 text-white p-3 rounded-full"
+      >
+        <Search className="w-5 h-5" />
+      </Button>
+    </motion.form>
+  );
+};
 
 const Features: React.FC<{darkMode: boolean}> = ({darkMode}) => {
   const features = [
