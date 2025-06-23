@@ -124,16 +124,51 @@ public class UserController {
         return ResponseEntity.ok(new UpdateResponse.Success(user));
     }
 
+    @PutMapping("/update/me/image")
+    public ResponseEntity<UpdateResponse> updateMeImage(
+        @RequestHeader("Authorization") String token,
+        @RequestPart(value = "image", required = true) MultipartFile image // Make image optional
+    ) throws EntityNotFoundException, AlreadyUsedEmailException, IOException {
+        Long id = jwtUtil.extractClaim(
+            token.replace("Bearer ", ""),
+            claims -> claims.get("id", Long.class)
+        );
+
+        UserDTO user = userService.updateMeImage(id, image);
+        return ResponseEntity.ok(new UpdateResponse.Success(user));
+    }
+
     @PutMapping("/update/me")
-    public ResponseEntity<UpdateResponse> updateMe(@RequestHeader("Authorization") String token, @RequestPart UpdateMe request, @RequestPart MultipartFile image)
-    throws EntityNotFoundException, AlreadyUsedEmailException, IOException
-    {
+    public ResponseEntity<UpdateResponse> updateMe(
+        @RequestHeader("Authorization") String token,
+        @RequestPart("request") UpdateMe request,
+        @RequestPart(value = "image", required = false) MultipartFile image // Make image optional
+    ) throws EntityNotFoundException, AlreadyUsedEmailException, IOException {
+        
         Long id = jwtUtil.extractClaim(
             token.replace("Bearer ", ""),
             claims -> claims.get("id", Long.class)
         );
 
         UserDTO user = userService.updateMe(request, id, image);
+        return ResponseEntity.ok(new UpdateResponse.Success(user));
+    }
+
+    @PutMapping("/update/me/info")
+    public ResponseEntity<UpdateResponse> updateMeInfo(
+        @RequestHeader("Authorization") String token,
+        @RequestBody UpdateMe request
+    ) throws EntityNotFoundException, AlreadyUsedEmailException, IOException {
+        
+        // Extract user ID from JWT token
+        Long id = jwtUtil.extractClaim(
+            token.replace("Bearer ", ""),
+            claims -> claims.get("id", Long.class)
+        );
+
+        // Update user info without image (pass null for MultipartFile parameter)
+        UserDTO user = userService.updateMe(request, id, null);
+        
         return ResponseEntity.ok(new UpdateResponse.Success(user));
     }
 

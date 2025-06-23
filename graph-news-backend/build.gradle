@@ -18,10 +18,19 @@ repositories {
 }
 
 dependencies {
+    // Spring Boot starters
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'org.springframework.boot:spring-boot-starter-web'
-    implementation 'edu.stanford.nlp:stanford-corenlp:4.0.0:models-spanish'
+    implementation 'org.springframework.boot:spring-boot-starter-data-neo4j'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    
+    // Stanford NLP
+    implementation 'edu.stanford.nlp:stanford-corenlp:4.5.9'
+    implementation 'edu.stanford.nlp:stanford-corenlp:4.5.9:models'
+    implementation 'edu.stanford.nlp:stanford-corenlp:4.5.9:models-english'
+    
+    // Document processing
     implementation 'org.apache.pdfbox:pdfbox:3.0.4'
     implementation 'org.apache.poi:poi-ooxml:5.4.0'
     implementation 'org.apache.poi:poi-scratchpad:5.4.0'
@@ -30,11 +39,69 @@ dependencies {
     runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.6'
     implementation 'io.jsonwebtoken:jjwt-api:0.12.6'
     runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.12.6'
+    
+    // Testing dependencies
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.security:spring-security-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    testRuntimeOnly 'com.h2database:h2'
 }
 
 tasks.withType(Jar) {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
+
+// =====================================
+// TEST CONFIGURATION
+// =====================================
+
+test {
+    useJUnitPlatform()
+    
+    testLogging {
+        events "passed", "skipped", "failed"
+        exceptionFormat = "short"
+        showStandardStreams = false
+    }
+    
+    systemProperty 'spring.profiles.active', 'test'
+    systemProperty 'spring.main.banner-mode', 'off'
+    
+    // Exclude heavy integration tests by default
+    exclude '**/WebDriver*Test.class'
+    exclude '**/Selenium*Test.class'
+    exclude '**/Stanford*Test.class'
+}
+
+task unitTests(type: Test) {
+    group = 'verification'
+    description = 'Runs unit tests only'
+    
+    useJUnitPlatform()
+    include '**/*ServiceTest.class'
+    include '**/*RepositoryTest.class'
+    include '**/Basic*Test.class'
+    include '**/Simple*Test.class'
+    
+    testLogging {
+        events "passed", "skipped", "failed"
+        showStandardStreams = false
+    }
+    
+    systemProperty 'spring.profiles.active', 'test'
+}
+
+task simpleTests(type: Test) {
+    group = 'verification'
+    description = 'Runs only simple basic tests'
+    
+    useJUnitPlatform()
+    include '**/Basic*Test.class'
+    include '**/Simple*Test.class'
+    
+    testLogging {
+        events "passed", "skipped", "failed"
+    }
+    
+    systemProperty 'spring.profiles.active', 'test'
 }
