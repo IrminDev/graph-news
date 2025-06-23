@@ -106,6 +106,20 @@ public class UserService {
         return UserMapper.toDto(user);
     }
 
+    public UserDTO updateMeImage(Long id, MultipartFile image) throws EntityNotFoundException, IOException {
+        User user = userRepository.findById(id).orElseThrow(() -> new EntityNotFoundException());
+        if(!user.getIsActive()){
+            throw new EntityNotFoundException();
+        }
+
+        if (image != null && !image.isEmpty()) {
+            user.setImage(image.getBytes());
+        }
+
+        userRepository.save(user);
+        return UserMapper.toDto(user);
+    }
+
     public UserDTO updateMe(UpdateMe request, Long id, MultipartFile image) throws EntityNotFoundException, IOException, AlreadyUsedEmailException {
         User user = userRepository.findById(id).orElseThrow(() -> new EntityNotFoundException());
         if(!user.getIsActive()){
